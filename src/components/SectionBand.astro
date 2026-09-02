@@ -1,6 +1,10 @@
 ---
 // Full-bleed coloured band carrying a page title in Review Condensed.
 //
+// The titles are set, not stamped. The per-letter sticker reveal is the
+// homepage hero's alone now — `data-sticker` is the opt-in, so having none is
+// what keeps every band on the site still.
+//
 // `fit` is the homepage treatment: the title is sized to span the full width of
 // the band, so the band's height falls out of the type rather than out of
 // padding — only the constant 12px optical drop under the baseline is added.
@@ -39,19 +43,11 @@ const edge = rule ? "border-b" : "";
 {
     fit ? (
         <div class={`${bg} ${text} w-full ${edge}`}>
-            <h2
-                class={`${size} w-full pb-[0.75cqw] text-center text-nowrap`}
-                data-sticker
-                style="--sticker-stagger:2"
-            >
-                {title}
-            </h2>
+            <h2 class={`${size} w-full pb-[0.75cqw] text-center text-nowrap`}>{title}</h2>
         </div>
     ) : (
         <div class={`${bg} ${text} w-full ${edge} px-[1%] py-[0.2%]`}>
-            <h1 class={size} data-sticker style="--sticker-stagger:2">
-                {title}
-            </h1>
+            <h1 class={size}>{title}</h1>
         </div>
     )
 }

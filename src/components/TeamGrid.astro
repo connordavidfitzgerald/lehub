@@ -103,7 +103,7 @@ const cells = people.flatMap((_, i) => {
                         and the card is a fixed ratio, so the copy scrolls inside it
                         rather than being clipped at the bottom edge. */}
                     <div data-team-bio class="absolute inset-0 hidden flex-col bg-paper p-[7.5%] md:flex">
-                        <div class="min-h-0 flex-1 overflow-y-auto">
+                        <div class="rule-scroll min-h-0 flex-1 overflow-y-auto">
                             <p class="font-sans text-[clamp(15px,1.497cqw,24px)] leading-[1.05] tracking-[-0.01em] text-black/90">
                                 {person.bio}
                             </p>

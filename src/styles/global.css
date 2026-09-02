@@ -237,7 +237,7 @@
  * whole system; --sticker-stagger (in frames) retimes one headline.
  * ------------------------------------------------------------------ */
 :root {
-    --sticker-fps: 15;
+    --sticker-fps: 16;
     --sticker-frame: calc(0.8s / var(--sticker-fps));
     --sticker-stagger: 1;
 }
@@ -294,11 +294,11 @@
         opacity: 0;
         /* the exaggerated pose only ever renders as one held frame, so it can
            be much further out than a tween would take */
-        transform: translate3d(0, 0.22em, 0) scale(0.72) rotate(calc(var(--r, 0deg) * 2));
+        transform: translate3d(0, 0em, 0);
     }
     50% {
         opacity: 1;
-        transform: translate3d(0, -0.03em, 0) scale(1) rotate(calc(var(--r, 0deg) * -1));
+        transform: translate3d(0, 0em, 0) scale(1);
     }
     100% {
         opacity: 1;
@@ -541,6 +541,53 @@
         translate calc(var(--sticker-frame) * 5) steps(5, jump-end),
         opacity calc(var(--sticker-frame) * 5) steps(5, jump-end),
         visibility 0s;
+}
+
+/* ------------------------------------------------------------------ *
+ * Scrolling copy inside a card — the overlay testimonials and the team bios.
+ *
+ * Drawn in the same hairlines as everything else: the channel is wide enough to
+ * grab, but all that is painted in it is a 1px rule for the track and a 1px rule
+ * for the thumb, at the weight of the site's other strokes. The thumb's length
+ * is the share of the copy you can see and its position is where you are, so
+ * the indicator is the line itself rather than a block riding on one.
+ *
+ * The track sits at the 0.2 ink the testimonial graph paper is drawn in, so a
+ * pane that does not overflow reads as a faint rule rather than as furniture.
+ *
+ * Firefox has no ::-webkit-scrollbar; `scrollbar-width`/`scrollbar-color` get it
+ * as close as that engine allows — a thin bar in the same ink, with the track
+ * left blank. They are gated behind @supports rather than set outright because
+ * Chrome honours BOTH, and the standard properties win: setting them
+ * unconditionally makes Chrome draw its own thin bar and ignore every rule
+ * below. The query asks the one question that separates the two engines.
+ * ------------------------------------------------------------------ */
+@supports not selector(::-webkit-scrollbar) {
+    .rule-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-ink) transparent;
+    }
+}
+
+.rule-scroll::-webkit-scrollbar {
+    width: 9px;
+}
+
+.rule-scroll::-webkit-scrollbar-track,
+.rule-scroll::-webkit-scrollbar-thumb {
+    /* A gradient of one colour is the shortest way to a solid 1px rule that can
+       be centred in a box wider than itself. */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 1px 100%;
+}
+
+.rule-scroll::-webkit-scrollbar-track {
+    background-image: linear-gradient(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.2));
+}
+
+.rule-scroll::-webkit-scrollbar-thumb {
+    background-image: linear-gradient(var(--color-ink), var(--color-ink));
 }
 
 /* The newsletter card's scrim. It fades on the same clock as the stamp but

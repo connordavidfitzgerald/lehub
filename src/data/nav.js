@@ -13,7 +13,7 @@ export const nav = [
         hl: "var(--color-blue)",
         children: [
             { label: "reports", href: "/reports" },
-            { label: "wiki", href: "#" },
+            { label: "wiki", href: "https://en.wiki.lehub.ca/index.php/Main_Page" },
         ],
     },
     { label: "offerings", href: "/offerings", hl: "var(--color-gold)" },

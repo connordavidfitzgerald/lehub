@@ -1,7 +1,7 @@
 ---
 // Shared contact block — appears at the foot of every page, and is the whole
 // of /contact. Figma: photo 802/1603 wide, the text column inset 30px (1.87cqw)
-// from the split with a 20px (1.247cqw) rhythm down its stack.
+// from the split; the stack's vertical rhythm is the three-step scale below.
 //
 // It takes the 1603/1080 block height the homepage sections run at (1080/1603 =
 // 67.374cqw of the content column), so it sits in the same rhythm rather than on
@@ -19,7 +19,7 @@ interface Props {
 }
 const { full = false } = Astro.props;
 
-const eyebrow = "w-fit text-[clamp(14px,1.372cqw,22px)] leading-[1.1] tracking-[-0.02em]";
+const eyebrow = "w-fit text-[clamp(14px,1.372cqw,22px)] leading-[1.1] ";
 // 72/1603 = 4.49cqw. The 34px floor is for the stacked layout, where this
 // column is the full width of the page; once the block splits in two at md the
 // column is half as wide and that floor overran it — "contact@lehub.ca" wants
@@ -30,6 +30,29 @@ const big =
 // The links in this block take the pink marker instead of turning pink; `big`
 // itself stays plain because the newsletter input wears it too.
 const bigLink = `${big} hl-link`;
+
+// Three steps, not one. The block was set on a flat 1.247cqw everywhere, which
+// meant a label and the line it labels were pushed as far apart as two
+// unrelated items — so the stack read as eight loose things rather than four
+// pairs in two groups. Each step is roughly 1.5x the one under it:
+//
+//   PAIR  a label and the thing it labels — they are one unit
+//   ITEM  between those units inside a group
+//   GROUP across the rule, and the column's own top and bottom padding
+//
+// PAIR is the smallest because it has the most help: `big` is set at
+// leading-[0.82], so its box crops close to the caps and the ink sits nearer
+// the gap than the metrics suggest, while the eyebrow's 1.1 leaves slack of
+// its own above. Measured 20px looks like 26 between those two.
+//
+// Each constant is a whole class rather than the bare length: Tailwind v4
+// finds candidates by scanning this file for literal strings, so a class
+// assembled out of an interpolated length is one it never sees and never
+// generates. GROUP's length is spelled out in full at the two places it is used
+// as padding rather than gap, for the same reason.
+const PAIR = "gap-[max(0.85cqw,12px)]";
+const ITEM = "gap-[max(1.87cqw,22px)]";
+const GROUP = "gap-[max(2.494cqw,28px)]";
 ---
 
 <footer
@@ -52,114 +75,164 @@ const bigLink = `${big} hl-link`;
 >
     <div class="flex grow flex-col md:flex-row">
         <!-- photo -->
-        <div class="h-[420px] w-full shrink-0 md:h-full md:w-1/2 md:border-r">
+        {
+            /* `md:h-auto`, not `h-full`: this is a flex item in a row whose own
+            height is set by the column beside it, so a percentage height has
+            nothing definite to resolve against and computes to auto — which
+            left a strip of paper under the photo. At auto, the default
+            `align-items: stretch` sizes it to the row, and the image's own
+            `h-full` then has a definite box to fill. */
+        }
+        <div class="h-[420px] w-full shrink-0 md:h-auto md:w-1/2 md:border-r">
             <Img name="footer.png" alt="" position="object-center" />
         </div>
 
         <!-- content -->
         <div
-            class="flex w-full flex-col justify-between px-4 pt-6 md:w-1/2 md:px-[1.87cqw] md:pt-8"
+            class="flex w-full flex-col justify-between px-4 pt-[max(2.494cqw,28px)] md:w-1/2 md:px-[1.87cqw]"
         >
-            <div class="flex flex-col gap-[max(1.247cqw,14px)]">
-                <div class="flex flex-col gap-[max(1.247cqw,14px)]">
-                    <p class={eyebrow}>
-                        For general inquiries, training requests, or questions about our programs,
-                        reach us at:
-                    </p>
-                    <a href="mailto:contact@lehub.ca" class={bigLink}>
-                        <span class="hl-mark" aria-hidden="true"></span>
-                        <span class="hl-label">contact@lehub.ca</span>
-                    </a>
-                </div>
-
-                <div class="flex flex-col gap-[max(1.247cqw,14px)]">
-                    <span class={eyebrow}>Follow us on social media:</span>
-                    <div class="flex flex-col">
-                        <a
-                            href={social.instagram}
-                            target="_blank"
-                            rel="noopener"
-                            class={bigLink}
-                        >
+            {
+                /* Two groups: the ways to reach us, then the two things we ask
+                of you. The rule between them is the one the site draws
+                everywhere else — `border-b` on the block above the seam — and
+                the padding under it matches the stack's own gap, so the stroke
+                sits midway between the blocks rather than crowding the one it
+                belongs to. */
+            }
+            <div class={`flex flex-col ${GROUP}`}>
+                <div class={`flex flex-col ${ITEM}`}>
+                    <div class={`flex flex-col ${PAIR}`}>
+                        <p class={eyebrow}>
+                            For general inquiries, training requests, or questions about our
+                            programs, reach us at:
+                        </p>
+                        <a href="mailto:contact@lehub.ca" class={bigLink}>
                             <span class="hl-mark" aria-hidden="true"></span>
-                            <span class="hl-label">Instagram</span>
+                            <span class="hl-label">contact@lehub.ca</span>
                         </a>
+                    </div>
+
+                    <div class={`flex flex-col ${PAIR}`}>
+                        <span class={eyebrow}>Follow us on social media:</span>
+                        <div class="flex flex-col">
+                            <a
+                                href={social.instagram}
+                                target="_blank"
+                                rel="noopener"
+                                class={bigLink}
+                            >
+                                <span class="hl-mark" aria-hidden="true"></span>
+                                <span class="hl-label">Instagram</span>
+                            </a>
+                            <a
+                                href={social.facebook}
+                                target="_blank"
+                                rel="noopener"
+                                class={bigLink}
+                            >
+                                <span class="hl-mark" aria-hidden="true"></span>
+                                <span class="hl-label">Facebook</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class={`flex flex-col -mt-2 ${ITEM}`}>
+                    {
+                        /* The form is hosted off-site (CryptPad), so this is the
+                        one link in the block that leaves for somewhere that is
+                        not a social account or the inbox. */
+                    }
+                    <div class={`flex flex-col ${PAIR}`}>
+                        <p class={eyebrow}>
+                            Tell us what you learned, what changed in your organizing, and where we
+                            can do better — with your name or anonymously. Your reflections keep us
+                            accountable and show funders what this work makes possible.
+                        </p>
                         <a
-                            href={social.facebook}
+                            href="https://cryptpad.fr/form/#/3/form/view/65931ccc0fee9528dc5bce72b3bdf6f5/"
                             target="_blank"
                             rel="noopener"
                             class={bigLink}
                         >
                             <span class="hl-mark" aria-hidden="true"></span>
-                            <span class="hl-label">Facebook</span>
+                            <span class="hl-label">Share a testimonial</span>
                         </a>
                     </div>
                 </div>
-
-                {
-                    /* The form is hosted off-site (CryptPad), so this is the one
-                    link in the block that leaves for somewhere that is not a
-                    social account or the inbox. */
-                }
-                <div class="flex flex-col gap-[max(1.247cqw,14px)]">
-                    <p class={eyebrow}>
-                        Tell us what you learned, what changed in your organizing, and where we can
-                        do better — with your name or anonymously. Your reflections keep us
-                        accountable and show funders what this work makes possible.
-                    </p>
-                    <a
-                        href="https://cryptpad.fr/form/#/3/form/view/65931ccc0fee9528dc5bce72b3bdf6f5/"
-                        target="_blank"
-                        rel="noopener"
-                        class={bigLink}
-                    >
-                        <span class="hl-mark" aria-hidden="true"></span>
-                        <span class="hl-label">Share a testimonial</span>
-                    </a>
-                </div>
-
-                <div class="flex flex-col gap-[max(1.247cqw,14px)]">
+                <div class={`flex flex-col ${PAIR}`}>
                     <label class={eyebrow} for="nl-footer">Sign up for our newsletter:</label>
-                    {/* This one is the real thing, not a trigger: the field is
-                        already the size of the card the overlay would open, so
-                        sending it somewhere to be retyped would be a step for
-                        nothing. It posts straight to the list, same as the
-                        overlay does. */}
-                    <form
-                        action={ACTION}
-                        method="post"
-                        target="_blank"
-                        class="flex w-full items-end justify-between gap-4"
-                    >
-                        <input
-                            id="nl-footer"
-                            type="email"
-                            name="EMAIL"
-                            required
-                            autocomplete="email"
-                            placeholder="EMAIL"
-                            class={`${big} min-w-0 flex-1 bg-transparent outline-none placeholder:text-black/90 focus:placeholder:text-black/35`}
-                        />
-                        {/* Off-screen rather than hidden: a bot fills what it
-                            can read, and `display: none` is the one thing they
-                            know to skip. */}
-                        <div class="absolute left-[-5000px]" aria-hidden="true">
-                            <input type="text" name={TRAP} tabindex="-1" value="" />
-                        </div>
-                        <button
-                            type="submit"
-                            aria-label="Subscribe"
-                            class="grid aspect-square shrink-0 cursor-pointer place-items-center bg-pink text-black/90 text-[34px] leading-none md:w-[4.06cqw] md:text-[clamp(20px,2.86cqw,46px)]"
+                    {
+                        /* This one is the real thing, not a trigger: the field
+                        is already the size of the card the overlay would
+                        open, so sending it somewhere to be retyped would be
+                        a step for nothing. It posts straight to the list,
+                        same as the overlay does. */
+                    }
+                    {
+                        /* The rule is the input's underline, not the next thing
+                        down — it rides with the field on the descender's
+                        slack rather than on the stack's gap, which had it
+                        floating a clear 20px under the type it belongs to. */
+                    }
+                    <div class="flex flex-col gap-[0.12em]">
+                        <form
+                            action={ACTION}
+                            method="post"
+                            target="_blank"
+                            class="flex w-full items-end justify-between gap-4"
                         >
-                            <Arrow />
-                        </button>
-                    </form>
-                    <span class="block h-px w-full bg-black"></span>
+                            <input
+                                id="nl-footer"
+                                type="email"
+                                name="EMAIL"
+                                required
+                                autocomplete="email"
+                                placeholder="EMAIL"
+                                class={`${big} min-w-0 flex-1 border-0 -mt-2 bg-transparent p-0 outline-none placeholder:text-black/90 focus:placeholder:text-black/35`}
+                            />
+                            {
+                                /* Off-screen rather than hidden: a bot fills what
+                                it can read, and `display: none` is the one thing
+                                they know to skip. */
+                            }
+                            <div class="absolute left-[-5000px]" aria-hidden="true">
+                                <input type="text" name={TRAP} tabindex="-1" value="" />
+                            </div>
+                            {
+                                /* The square is the cap height of the word
+                                beside it, so it reads as the same size as
+                                EMAIL rather than as a block that overshoots
+                                it. This face caps at exactly 0.75em, so the
+                                width mirrors `big`'s own clamp scaled by
+                                0.75 — including its md step, where the
+                                floor drops because the column halves — and
+                                `items-end` on the form sets it on the
+                                baseline. The arrow is 70% of the square,
+                                the proportion it had before. */
+                            }
+                            <button
+                                type="submit"
+                                aria-label="Subscribe"
+                                class="grid aspect-square shrink-0 mb-2 cursor-pointer place-items-center bg-pink text-black/90 leading-none w-[clamp(25.5px,3.3675cqw,54px)] text-[clamp(18px,2.357cqw,38px)] md:w-[clamp(15px,3.3675cqw,54px)] md:text-[clamp(10.5px,2.357cqw,38px)]"
+                            >
+                                <Arrow />
+                            </button>
+                        </form>
+                        <span class="block h-px w-full bg-black"></span>
+                    </div>
                 </div>
             </div>
 
+            {
+                /* The margin is a floor, not a gap. `justify-between` pins this row to
+                the bottom of the column whenever the block is taller than its
+                contents, and in that case the margin costs nothing; where the
+                column runs short — around the md breakpoint, where it is half
+                of a small screen — it is the only thing keeping this line off
+                the newsletter rule above it, which is why it holds at md too. */
+            }
             <div
-                class="mt-10 flex flex-col gap-2 text-[clamp(12px,1.123cqw,18px)] leading-none tracking-[-0.02em] md:mt-0 md:flex-row md:items-end md:justify-between pb-8"
+                class="mt-[max(2.494cqw,28px)] flex flex-col gap-2 pb-[max(2.494cqw,28px)] text-[clamp(12px,1.123cqw,18px)] leading-none md:flex-row md:items-end md:justify-between"
             >
                 <p id="land-ack-line">
                     Le Hub was founded on the territories of The Kanien’kehá:ka.
@@ -222,9 +295,7 @@ const bigLink = `${big} hl-link`;
             screen, so the body scrolls and the heading rule holds the top. */
         }
         <div class="min-h-0 flex-1 overflow-y-auto">
-            <div
-                class="flex flex-col gap-[0.9em] text-[clamp(13px,1.372cqw,22px)] leading-[1.2] tracking-[-0.01em]"
-            >
+            <div class="flex flex-col gap-[0.9em] text-[clamp(13px,1.372cqw,22px)] leading-[1.2]">
                 <p>
                     The Organizing Hub / Le Hub de Mobilisation was founded on the territories of
                     The Kanien’kehá:ka, who are the keepers of the Eastern Door of the Haudenosaunee
