@@ -1,0 +1,41 @@
+---
+// The printed-sheet treatment: a CMYK rosette screen plus paper grain, laid
+// over the whole page. Figma does this with a viewport-sized `Sunset 001 3`
+// rectangle at SOFT_LIGHT on top of every frame.
+//
+// The layers stay viewport-fixed and ui.js drives `--print-y` from the scroll
+// position instead, so the texture travels with the content like one continuous
+// sheet while the composited layer is never taller than the screen. A
+// document-tall blend layer would be the obvious build and is the expensive one.
+//
+// Three ROOT-LEVEL siblings rather than three children of one wrapper: an
+// element with `mix-blend-mode` blends against its backdrop, and that backdrop
+// is clipped to the nearest stacking-context ancestor. A `fixed` + `z-index`
+// wrapper is a stacking context, so nesting these inside one would isolate them
+// into an empty group and silently reduce every blend mode to `normal` — the
+// layers must sit directly in the root stacking context to see the page under
+// them. Each needs its own mode (overlay for the screen and the stock tint,
+// soft-light for the grain), which is why it is three elements and not one with
+// stacked backgrounds.
+import rosette from "../assets/textures/rosette.png";
+---
+
+<div
+    id="print-screen"
+    aria-hidden="true"
+    class="print-screen pointer-events-none fixed inset-0 z-[60] saturate-120"
+    style={`background-image:url(${rosette.src})`}
+>
+</div>
+<div
+    id="print-tint"
+    aria-hidden="true"
+    class="print-tint pointer-events-none fixed inset-0 z-[61]"
+>
+</div>
+<div
+    id="print-grain"
+    aria-hidden="true"
+    class="print-grain pointer-events-none fixed inset-0 z-[62]"
+>
+</div>

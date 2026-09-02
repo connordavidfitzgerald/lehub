@@ -1,0 +1,49 @@
+---
+// Renders an image from src/assets/images by filename.
+// Until the Figma export lands, missing files render as a labelled placeholder
+// instead of breaking the build.
+import { Image } from "astro:assets";
+
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+    "../assets/images/*.{jpg,jpeg,png,webp,avif}",
+    { eager: true },
+);
+
+interface Props {
+    name: string;
+    alt?: string;
+    class?: string;
+    position?: string;
+    loading?: "eager" | "lazy";
+}
+
+const {
+    name,
+    alt = "",
+    class: cls = "",
+    position = "object-center",
+    loading = "lazy",
+} = Astro.props;
+
+const key = Object.keys(modules).find((k) => k.endsWith(`/${name}`));
+const src = key ? modules[key].default : null;
+---
+
+{
+    src ? (
+        <Image
+            src={src}
+            alt={alt}
+            loading={loading}
+            class={`h-full w-full object-cover ${position} ${cls}`}
+        />
+    ) : (
+        <div
+            class={`h-full w-full bg-[repeating-linear-gradient(45deg,#e6e3d8_0px,#e6e3d8_12px,#dedbcf_12px,#dedbcf_24px)] flex items-center justify-center ${cls}`}
+        >
+            <span class="font-sans text-[11px] tracking-wide text-black/45 px-2 text-center break-all">
+                {name}
+            </span>
+        </div>
+    )
+}

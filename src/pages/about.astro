@@ -1,0 +1,299 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Img from "../components/Img.astro";
+import SectionBand from "../components/SectionBand.astro";
+import TeamGrid from "../components/TeamGrid.astro";
+import { advisors } from "../data/advisors.js";
+
+const alumni = [
+    "Tom Liacas",
+    "Amara Possian",
+    "Jacqueline Lee-Tam",
+    "Jaouad Laaroussi",
+    "Mackenzie Burnett",
+    "Florence Lorimier-Dugas",
+    "Ayo Ogunremi",
+    "Kenzie Harris",
+    "Isabelle Grondin Hernandez",
+    "Zoyanne Côté",
+    "Florence Lachapelle",
+    "Caitlin Chan",
+    "Laura Doyle-Péan",
+    "Michelle Xie",
+    "Amina Vance",
+    "Zahur Ashrafuzzaman",
+    "Naomi Leung",
+    "Tristan Pérez",
+    "Shi Tao Zhang",
+    "Sam Lin",
+    "Mara Gabriela Puentes-Benitez",
+    "Léonard Leclerc.",
+];
+
+const approach = [
+    {
+        title: "Organizing First",
+        bg: "bg-paper",
+        body: "We put organizing ahead of mobilizing and advocacy because movements win by growing the number of people behind a cause and by building the leadership and confidence of ordinary people to act. Alongside other approaches, organizing widens what people think is possible and builds the grassroots power that makes victories last.",
+    },
+    {
+        title: "How We Teach",
+        bg: "bg-band-green",
+        body: "Our teaching is practical, relational, and grounded in real movement experience. We cover the skills organizers name as their pain points: choosing a winnable issue, crafting demands, power mapping, developing strategy, escalating tactics, recruiting and keeping members, handling conflict, strengthening group structures, and organizing across difference. We draw on several organizing traditions, real case studies, and the knowledge participants bring. Our programs attract many youth organizers, and their urgency and experimentation sharpen the learning for everyone.",
+    },
+    {
+        title: "Shaped By Need",
+        bg: "bg-band-pink",
+        body: "We decide what to teach by asking. Our programs come out of needs assessments with organizers across the country and feedback we gather after every training. Organizers tell us they want deeper strategy, more confidence building a campaign, help with conflict, and room to think through political questions together. Our trainings answer with concrete tools and space to experiment.",
+    },
+    {
+        title: "Our Areas",
+        bg: "bg-paper",
+        body: "Our team has organized in climate justice, tenant campaigns, student movements, mutual aid, and community campaigns. We keep learning from the movements we work in.",
+    },
+];
+
+// One type scale for the page, measured in cqw of the content column the way
+// the homepage is. The old sizes were in vw, i.e. against the whole window
+// including the sidebar, so every size on this page ran ~17% small on desktop
+// and drifted further the wider the screen got.
+//
+// Two page-wide roles — the STATEMENT that opens a section and BODY for running
+// copy — plus the sizes the approach cards and the alumni list set for
+// themselves below.
+const statement = "font-sans leading-none text-black/90 text-[clamp(24px,3.743cqw,60px)]";
+const body = "text-[clamp(15px,1.622cqw,26px)] leading-[1.15]";
+
+// The approach cards run one size for both roles — the eyebrow is the body
+// size set in caps, with no rule between them; the block colour does the
+// separating work the rule used to do.
+const cardLabel =
+    "font-sans  uppercase leading-none text-black/90 text-[clamp(14px,1.497cqw,24px)]";
+const cardBody = "font-sans  leading-[1.05] text-black/90 text-[clamp(18px,1.497cqw,28px)]";
+
+// The alumni list sets its own two sizes: it is a directory, not running copy,
+// so the names are ruled rows rather than LABEL/FINE eyebrow type.
+const listHead = "font-sans text-[clamp(14px,1.372cqw,22px)] leading-none";
+const listName = "font-sans text-[clamp(13px,1.248cqw,20px)] leading-none";
+---
+
+<Layout title="Le Hub — About us">
+    <!-- hero + band -->
+    <section class="w-full">
+        <div
+            class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px] border-b border-b-black"
+        >
+            <Img
+                name="hero-studio.jpg"
+                alt="Organizers working together in the Le Hub studio"
+                loading="eager"
+            />
+        </div>
+        <SectionBand
+            title="About us"
+            fit
+            bg="bg-lime"
+            text="text-black/80"
+            size="text-[25.38cqw]"
+        />
+    </section>
+
+    <!-- statement + banner photo -->
+    <section class="flex w-full flex-col md:min-h-[67.374cqw] md:flex-row">
+        <div
+            class="flex w-full flex-col justify-center gap-10 bg-paper p-4 md:w-1/2 md:gap-0 md:border-r md:p-[2.43cqw]"
+        >
+            <!-- Set in the display face like the hero, with the phrase the
+                 sentence turns on carried by the pink marker rather than by an
+                 italic — Review Condensed has no italic cut, so `em` was being
+                 synthesised into a slant the family never had. -->
+            <p
+                class="flex flex-col gap-[1em] text-[clamp(18px,2.246cqw,36px)] leading-none tracking-[0em] font-sans"
+            >
+                In 2019, youth-led climate strikes reminded the world of something history keeps
+                proving: young people drive social change, and when they have support at the
+                grassroots, they do what no one thought possible.<br /><br />We founded Le Hub in
+                2020 to give young organizers skills-based training built on our values — dignity
+                and respect for all, equity and solidarity, and trust in grassroots knowledge. In
+                2026, after six years of learning and growth, we widened our mandate to work across
+                all issues.
+            </p>
+        </div>
+        <div class="aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2">
+            <Img name="about-1.png" alt="A climate justice banner" />
+        </div>
+    </section>
+
+    <!-- photo + two columns -->
+    <section class="flex w-full flex-col border-t md:min-h-[67.374cqw] md:flex-row">
+        <div class="aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2 md:border-r">
+            <Img name="about-3.jpg" alt="A Le Hub training session" class="saturate-140" />
+        </div>
+        <div
+            class="flex w-full flex-col justify-center gap-[0.9em] bg-paper p-4 md:w-1/2 md:p-[2.43cqw]"
+        >
+            <p class="text-[clamp(18px,2.246cqw,36px)] leading-none tracking-[0em] font-sans">
+                We focus on honing the craft of organizing – supporting everyday people to build
+                collective power and sustained action that moves beyond awareness-raising or
+                lobbying and toward durable, transformative change.
+            </p>
+            <p class="text-[clamp(18px,2.246cqw,36px)] leading-none tracking-[0em] font-sans">
+                As the only national bilingual grassroots training centre in Canada, Le Hub plays a
+                crucial role in meeting recurring and emerging organizing needs, fostering movement
+                connections and dialogue, and helping to synthesize and amplify grassroots knowledge
+                within a long-view of social movement development.
+            </p>
+        </div>
+    </section>
+
+    <!-- wide statement + landscape -->
+    <section class="flex w-full flex-col h-fit border-t">
+        <div class="h-fit w-full md:h-auto md:flex-1">
+            <Img name="about-2.jpg" alt="" />
+        </div>
+        <div class="flex flex-col gap-[0.9em] bg-paper p-4 md:p-[2.43cqw]">
+            <p class="text-[clamp(18px,2.246cqw,36px)] leading-none tracking-[0em] font-sans">
+                We are living through times of overlapping crises — climate catastrophe, housing and
+                worker precarity, rising authoritarianism, and deepening inequality.<br /><br />Now
+                more than ever, young people and organizers of all ages need spaces to learn,
+                reflect, and build collective power so our movements can grow, adapt, and win. This
+                work is not only about resisting harm, but about developing the social
+                infrastructure and political imagination needed to build a world where all life can
+                flourish. We do this work with you because movements are strongest when organizers
+                share tools, build solidarity, and support each other across difference.
+            </p>
+        </div>
+    </section>
+
+    <!-- team -->
+    <section class="w-full border-t">
+        <SectionBand
+            title="Our team"
+            fit
+            bg="bg-band-green"
+            text="text-black/80"
+            size="text-[24.89cqw]"
+        />
+        <TeamGrid />
+    </section>
+
+    <!-- advisory board -->
+    <section class="w-full border-t">
+        <SectionBand
+            title="Advisory board"
+            fit
+            bg="bg-band-pink"
+            text="text-black/80"
+            size="text-[14.24cqw]"
+        />
+        <TeamGrid people={advisors} />
+    </section>
+
+    <!-- building from our roots -->
+    <section class="w-full border-t">
+        <SectionBand
+            title="Building from our roots"
+            fit
+            bg="bg-lime"
+            text="text-black/80"
+            size="text-[9.26cqw]"
+        />
+        <div class="flex w-full flex-col md:min-h-[67.374cqw] md:flex-row">
+            <div class="aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2 md:border-r">
+                <Img name="former.png" alt="Le Hub members and alumni" />
+            </div>
+            <!-- The copy hugs its own height at the top and the list hugs its
+                 own at the bottom, with the slack between them. It stays in
+                 flow so the gap under the paragraph is real spacing, but
+                 `mt-auto` drops it to the foot of the panel and negative
+                 margins pull it back out through the panel's padding on the
+                 left and the bottom, so it meets the photo and the bottom edge
+                 with no seam. -->
+            <div
+                {/* No `h-full` here: `height: 100%` against a row whose own
+                    height is auto is indefinite, so it resolved to the content
+                    height — and because `height` was set at all, the item
+                    stopped stretching. The panel came up short of the photo
+                    beside it and `mt-auto` parked the list at the panel's
+                    bottom rather than the section's. Left to `auto`, the flex
+                    default stretches it to the row. */}
+                class="flex w-full flex-col gap-[1.25cqw] bg-paper p-4 md:w-1/2 md:p-[1.25cqw]"
+            >
+                <p class={`${body} shrink-0 font-sans`}>
+                    Our movements are as strong as the relationships that sustain them.<br /><br
+                    />We honour the dedication, care, and creativity of former members of Le Hub,
+                    whose contributions and experiments make our work possible today. Their wisdom
+                    continues to shape our pedagogy, our politics, and the ways we show up for
+                    organizers across many struggles.
+                </p>
+                <div
+                    class="flex min-h-0 flex-col bg-lime p-4 md:-mb-[1.25cqw] md:-ml-[1.25cqw] md:mt-auto md:w-[66%] md:p-[1.25cqw]"
+                >
+                    <div class={`${listHead} shrink-0 border-b border-black pb-[0.35em]`}>
+                        Former Hub Advisors and Members
+                    </div>
+                    {
+                        /* One fixed row height rather than an equal share of the
+                        block: the block is sized by the list now, not the other
+                        way round, so the rhythm is the same on every screen and
+                        there is no slack left over to distribute. */
+                    }
+                    <ul class={listName}>
+                        {
+                            alumni.map((n) => (
+                                <li class="flex h-[1.35em] items-center border-b border-black">
+                                    {n}
+                                </li>
+                            ))
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- our approach -->
+    <section class="w-full border-t">
+        <SectionBand
+            title="Our approach"
+            fit
+            bg="bg-lime"
+            text="text-black/80"
+            size="text-[15.96cqw]"
+        />
+        <!-- No borders on the blocks: the whole box is a black ground and the
+             blocks sit on it with a 1px gutter, so the outer rules and every
+             interior seam are the same single stroke as the rest of the site
+             and none can double, half-pixel, or go missing as the grid tracks
+             resolve. Its top edge is the one it does not draw — the band above
+             it already carries that rule, and `p-px` on all four sides would
+             lay a second one on top of it. The left edge is the same story: the
+             sidebar's own `border-r` is already the rule at that seam, so a
+             pixel of ground there stacks against it and the block reads 2px
+             there against 1px everywhere else. Hence right and bottom only. -->
+
+        <div class="flex w-full flex-col gap-px bg-black pr-px pb-px">
+            <!-- Not the display face here — the frame sets this in the sans at
+                 the same weight as the cards, and turns the closing phrase with
+                 an italic rather than a colour marker. -->
+            <div class={`${statement} bg-paper p-4 md:p-[1.25cqw]`}>
+                We teach organizing: everyday people building power through relationships, strategy,
+                and sustained action that wins real gains and <em class="not-italic md:italic"
+                    >shifts who holds power over time.</em
+                >
+            </div>
+            <div class="grid w-full grid-cols-1 gap-px md:grid-cols-2">
+                {
+                    approach.map((c) => (
+                        <div
+                            class={`${c.bg} flex flex-col justify-between gap-8 p-4 md:aspect-[802/540] md:p-[1.25cqw]`}
+                        >
+                            <h3 class={cardLabel}>{c.title}</h3>
+                            <p class={cardBody}>{c.body}</p>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+</Layout>

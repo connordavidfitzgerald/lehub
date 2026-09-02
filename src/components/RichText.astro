@@ -1,0 +1,69 @@
+---
+// Running copy with links in it.
+//
+// A sentence in the middle of a paragraph cannot be a data string and a link at
+// the same time, so copy that needs one is written as a list of segments: a
+// plain string, or an object naming what the words do. This renders that list
+// inline, leaving the paragraph and its type to the caller.
+//
+//   "Subscribe to "                                    -> text
+//   { text: "our newsletter", newsletter: true }       -> opens the sign-up card
+//   { text: "Compass", href: "/offerings#compass" }    -> a link
+//   { text: "(EN)", small: true }                      -> an aside, half size
+//
+// Every link wears the same dress, whatever it does, because to a reader they
+// are all the same offer: the site's marker plus a rule, so the link reads as
+// one at rest too — the marker alone is a hover state, and there is no hover on
+// a touch screen.
+interface Part {
+    text: string;
+    href?: string;
+    newsletter?: boolean;
+    small?: boolean;
+}
+
+interface Props {
+    parts: (string | Part)[];
+}
+const { parts } = Astro.props;
+
+const dress = "hl-link underline decoration-1 underline-offset-2";
+---
+
+{
+    parts.map((part) => {
+        if (typeof part === "string") return part;
+
+        if (part.small) return <span class="text-[0.5em]">{part.text}</span>;
+
+        // The newsletter one opens the card rather than going anywhere, so it
+        // is a button — dressed the same, because to the reader it is the same
+        // offer.
+        if (part.newsletter)
+            return (
+                <button
+                    type="button"
+                    data-newsletter-open
+                    class={`${dress} cursor-pointer text-left`}
+                >
+                    <span class="hl-mark" aria-hidden="true" />
+                    <span class="hl-label">{part.text}</span>
+                </button>
+            );
+
+        // A mailto hands off to a mail client and an in-site link stays in the
+        // tab you are reading; only somewhere else on the web gets a new one.
+        const external = /^https?:/.test(part.href ?? "");
+        return (
+            <a
+                href={part.href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener" : undefined}
+                class={dress}
+            >
+                <span class="hl-mark" aria-hidden="true" />
+                <span class="hl-label">{part.text}</span>
+            </a>
+        );
+    })
+}

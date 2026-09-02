@@ -1,0 +1,57 @@
+---
+// Full-bleed coloured band carrying a page title in Review Condensed.
+//
+// `fit` is the homepage treatment: the title is sized to span the full width of
+// the band, so the band's height falls out of the type rather than out of
+// padding — only the constant 12px optical drop under the baseline is added.
+// It is set nowrap: a `fit` size is computed for the title on ONE line, so a
+// multi-word title left to wrap would break onto a second line and take the
+// band's height with it.
+// The band owns the rule UNDER it, the way a section owns the rule above it
+// (`border-t`), so every horizontal seam on a page is drawn exactly once and
+// whatever follows a band never needs a top border of its own. `rule={false}`
+// is for the one case that inverts: when the band is the last thing on the
+// page, the footer beneath it already draws its own top rule, and the band
+// standing on that would lay a second stroke on the same seam.
+//
+// Sizes are given in cqw of the nearest container (main), which is
+// where the Figma ratios were measured — ABOUT at 591/1603 = 36.9cqw, and so on.
+interface Props {
+    title: string;
+    bg: string;
+    text?: string;
+    size?: string;
+    fit?: boolean;
+    /** Drop the rule under the band when what follows already draws one. */
+    rule?: boolean;
+}
+const {
+    title,
+    bg,
+    text = "text-black",
+    size = "text-[clamp(52px,11.229cqw,180px)]",
+    fit = false,
+    rule = true,
+} = Astro.props;
+const edge = rule ? "border-b" : "";
+---
+
+{
+    fit ? (
+        <div class={`${bg} ${text} w-full ${edge}`}>
+            <h2
+                class={`${size} w-full pb-[0.75cqw] text-center text-nowrap`}
+                data-sticker
+                style="--sticker-stagger:2"
+            >
+                {title}
+            </h2>
+        </div>
+    ) : (
+        <div class={`${bg} ${text} w-full ${edge} px-[1%] py-[0.2%]`}>
+            <h1 class={size} data-sticker style="--sticker-stagger:2">
+                {title}
+            </h1>
+        </div>
+    )
+}

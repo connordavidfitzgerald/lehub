@@ -1,0 +1,68 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Img from "../components/Img.astro";
+import SectionBand from "../components/SectionBand.astro";
+
+const reports = [
+    {
+        title: "Tools for Change",
+        subtitle: "Understanding the Needs of Climate Justice Organizers in Canada",
+        author: "by Amanda Harvey-Sànchez",
+        bg: "bg-card-pink",
+        cover: "report-1.png",
+        pdf: "https://www.lehub.ca/media/hubtoolsforchangereport.pdf",
+    },
+    {
+        title: "Towards Community Power",
+        subtitle: "Understanding the Needs of Climate Justice Organizers in Canada",
+        author: "by Amanda Harvey-Sànchez",
+        bg: "bg-card-yellow",
+        cover: "report-2.png",
+        pdf: "https://www.lehub.ca/media/movementmemoreport24.pdf",
+    },
+    {
+        // Read off the cover artwork and the PDF itself, which agree; the title
+        // this card carried ("How We Win!", by Amanda Harvey-Sànchez) belongs to
+        // neither and is nowhere on the page it links to.
+        title: "Building the Whirlwind",
+        subtitle: "Movement-building lessons from the Montreal climate protests",
+        author: "published by the Broadbent Institute",
+        bg: "bg-card-green",
+        cover: "report03.png",
+        pdf: "https://www.lehub.ca/media/buildingthewhilrwind.pdf",
+    },
+];
+---
+
+<Layout title="Le Hub — Reports">
+    <section class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px]">
+        <Img name="reports.png" alt="A stack of binders" loading="eager" class="w-full" />
+    </section>
+
+    <SectionBand title="Reports" fit bg="bg-teal" text="text-[#0d3b31]" size="text-[27.38cqw]" />
+
+    <section
+        class="grid w-full grid-cols-1 gap-8 px-4 py-16 sm:grid-cols-2 md:grid-cols-3 md:gap-[4%] md:px-[4%] md:py-[10%]"
+    >
+        {
+            reports.map((r) => (
+                <a
+                    href={r.pdf}
+                    target="_blank"
+                    rel="noopener"
+                    class={`${r.bg} group relative flex aspect-[393/565] flex-col justify-between overflow-hidden p-[6%]`}
+                >
+                    {/* The cover carries the title, so the artwork is the card
+                        and the name it goes by is set for screen readers —
+                        without it the link is a picture with nothing to read. */}
+                    <span class="sr-only">
+                        {r.title}: {r.subtitle}, {r.author} (PDF)
+                    </span>
+                    <div class="absolute inset-0 opacity-100">
+                        <Img name={r.cover} alt="" />
+                    </div>
+                </a>
+            ))
+        }
+    </section>
+</Layout>

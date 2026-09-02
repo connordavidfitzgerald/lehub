@@ -1,0 +1,33 @@
+---
+// The submit arrow on the newsletter fields.
+//
+// Drawn rather than set as "→". The glyph came from Neue Haas at its book
+// weight — a thin, rounded, system-looking arrow sitting in a pink square next
+// to type in Review Condensed Heavy, which is the one place on the site where
+// the two faces meet and the mismatch shows. This is the same arrow the site's
+// own drawing rules make everywhere else: flat, blunt-ended, mitred, and struck
+// at the weight of the type beside it rather than the weight of a hairline.
+//
+// Sized in `em` so it tracks the button's font-size, which is fluid. `class`
+// replaces that sizing rather than adding to it — two arbitrary `h-[…]` values
+// would be a coin toss decided by stylesheet order, not by which one is written
+// last on the element.
+interface Props {
+    class?: string;
+}
+const { class: cls = "h-[0.5em] w-[0.5em]" } = Astro.props;
+---
+
+<svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.75"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+    aria-hidden="true"
+    class={cls}
+>
+    <path d="M3 12h17" />
+    <path d="M12.5 4.5 20 12l-7.5 7.5" />
+</svg>

@@ -1,0 +1,97 @@
+---
+// The newsletter sign-up, as one overlay for the whole site.
+//
+// It posts straight to the list rather than running Mailchimp's embed; see
+// data/newsletter.js for what that endpoint wants and why.
+//
+// Shaped like the testimonial card — same stamp-in, same hairline border with
+// the heavier bottom edge — but on paper rather than the testimonials' yellow,
+// and fixed to the viewport rather than placed inside a section, because it is
+// opened from several places across the site.
+// It lives at the root of `body`, NOT inside `main`: `main` is a `@container`,
+// which makes it the containing block for fixed descendants, so the card would
+// centre itself on the document instead of the screen. That is also why the
+// type here is set in px rather than the site's cqw ratios: outside `main`
+// there is no container for cqw to resolve against, and it would silently fall
+// back to the viewport. The card is capped at 520px, so it has no need to be
+// fluid.
+
+import { ACTION, TRAP } from "../data/newsletter.js";
+import Arrow from "./Arrow.astro";
+---
+
+{
+    /* The scrim is the click-off target and the reason the card is readable
+       over whatever it opened on top of. The testimonial card can do without
+       one — it is confined to its own section and never leaves it. */
+}
+<div
+    data-newsletter-scrim
+    aria-hidden="true"
+    class="newsletter-scrim pointer-events-none fixed inset-0 z-[55] bg-black/25 opacity-0"
+>
+</div>
+
+<div
+    id="newsletter"
+    data-newsletter-panel
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="newsletter-title"
+    class="stamp-panel fixed inset-0 z-[56] m-auto flex h-fit max-h-[86svh] w-[84%] max-w-[520px] flex-col gap-5 border border-b-2 bg-paper p-[5%] text-black/90 md:gap-6 md:p-8"
+>
+    <div class="flex shrink-0 items-baseline justify-between gap-4">
+        <h2
+            id="newsletter-title"
+            class="font-sans font-medium normal-case leading-none text-[20px] md:text-[24px]"
+        >
+            Subscribe
+        </h2>
+        <button
+            type="button"
+            data-newsletter-close
+            class="shrink-0 cursor-pointer text-[13px] leading-none hover:text-pink"
+        >
+            close ×
+        </button>
+    </div>
+
+    <form action={ACTION} method="post" target="_blank" class="flex flex-col gap-4">
+        {
+            /* `items-end` and the square button are the footer field's shape, so
+            the overlay reads as that field opened up rather than as a
+            different form. */
+        }
+        <div class="flex w-full items-end justify-between gap-4">
+            <input
+                id="newsletter-email"
+                type="email"
+                name="EMAIL"
+                required
+                autocomplete="email"
+                placeholder="EMAIL"
+                class="min-w-0 flex-1 bg-transparent font-display text-[34px] font-extrabold uppercase leading-[0.82] text-black/90 outline-none placeholder:text-black/35"
+            />
+            <button
+                type="submit"
+                class="grid aspect-square w-[46px] shrink-0 cursor-pointer place-items-center bg-pink text-[34px] leading-none text-black/90"
+                aria-label="Subscribe"
+            >
+                <Arrow />
+            </button>
+        </div>
+        <span class="block h-px w-full bg-black"></span>
+
+        {
+            /* Off-screen rather than hidden: a bot that reads the DOM fills what
+            it can see, and `display: none` is the one thing they know to skip. */
+        }
+        <div class="absolute left-[-5000px]" aria-hidden="true">
+            <input type="text" name={TRAP} tabindex="-1" value="" />
+        </div>
+
+        <p class="text-[12px] leading-[1.2] text-black/90">
+            Confirming opens Mailchimp in a new tab. Unsubscribe any time.
+        </p>
+    </form>
+</div>

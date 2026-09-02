@@ -1,0 +1,184 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Img from "../components/Img.astro";
+import SectionBand from "../components/SectionBand.astro";
+import { social } from "../data/social.js";
+import RichText from "../components/RichText.astro";
+
+const programs = [
+    {
+        title: "Compass",
+        image: "compass.png",
+        titleBg: "bg-compass",
+        titleText: "text-[#2e4318]",
+        imageFirst: true,
+        body: [
+            "Compass is our coaching program: ongoing, tailored support for organizers who want to deepen their practice and apply what they learn to real work. You need not have attended a training first.",
+            "Come as an individual or a small team, in English or French. Coaches can help you set goals, choose targets and tactics, handle conflict, sharpen your storytelling and media work, recruit and keep members, and build group structures that work.",
+        ],
+        info: [
+            "Coaching is free for grassroots organizers across so-called Canada and Quebec. Write to ",
+            { text: "amanda@lehub.ca", href: "mailto:amanda@lehub.ca" },
+            " ",
+            { text: "(EN)", small: true },
+            " or ",
+            { text: "jacob@lehub.ca", href: "mailto:jacob@lehub.ca" },
+            " ",
+            { text: "(FR)", small: true },
+            ".",
+        ],
+    },
+    {
+        title: "Catalyst",
+        image: "offer-catalyst.png",
+        titleBg: "bg-catalyst",
+        titleText: "text-[#0d2f22]",
+        imageFirst: false,
+        body: [
+            "Catalyst is our one-day organizing skills camp. It brings organizers from different struggles together in one city or region to build core skills, deepen political relationships, and grow the trust that long-term collaboration needs.",
+            "We run Catalyst with local grassroots groups and build each one around the problems organizers there name. When organizers meet across issues, movements share lessons and get stronger.",
+        ],
+        info: [
+            "Subscribe to ",
+            { text: "our newsletter", newsletter: true },
+            " or follow us on ",
+            { text: "Instagram", href: social.instagram },
+            " and ",
+            { text: "Facebook", href: social.facebook },
+            " for Catalyst dates.",
+        ],
+    },
+    {
+        title: "Groundswell",
+        image: "ground.png",
+        titleBg: "bg-groundswell",
+        titleText: "text-[#0a1d2b]",
+        imageFirst: true,
+        body: [
+            "Groundswell is our online, multi-session campaign training. Over several weeks, organizers learn to pick a campaign issue, craft winnable demands, map targets and stakeholders, build strategy, and test tactics as the campaign unfolds.",
+            "You work in a cohort, so you leave with both skills and people to think alongside. Come with an idea or come mid-campaign — either way you leave with a plan.",
+        ],
+        info: [
+            "We run Groundswell twice a year, spring and fall. Subscribe to ",
+            { text: "our newsletter", newsletter: true },
+            " to hear when registration opens.",
+        ],
+    },
+];
+---
+
+<Layout title="Le Hub — Offerings">
+    <section class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px]">
+        <Img
+            name="hero-studio.jpg"
+            alt="The Le Hub studio during a work session"
+            loading="eager"
+            class="saturate-180 contrast-120"
+        />
+    </section>
+
+    <!-- Wrapped so the band gets the rule above it the same way every other
+         block on the site does — from the section it sits in. -->
+    <section class="w-full border-t">
+        <SectionBand
+            title="Offerings"
+            fit
+            bg="bg-gold"
+            text="text-black/80"
+            size="text-[23.15cqw]"
+        />
+    </section>
+
+    {
+        programs.map((p, i) => (
+            // The band draws the rule over the first programme, so only the
+            // ones after it carry a top rule of their own.
+            //
+            // The id makes each programme a link target, so a mention of it
+            // elsewhere on the site can land on the programme rather than the
+            // top of the page. `scroll-mt-16` is the mobile bar: it is fixed
+            // over the top of the viewport, so an anchor landing here would
+            // otherwise park the title underneath it. There is no bar at md.
+            <section
+                id={p.title.toLowerCase()}
+                class={`w-full scroll-mt-16 md:scroll-mt-0 ${i > 0 ? "border-t" : ""}`}
+            >
+                {/* The title spans both halves and sticks while its own
+                    programme scrolls past, so you always know which one you
+                    are reading. It parks under the mobile bar on small
+                    screens, and under nothing on desktop — the sidebar is
+                    fixed beside main, not over it.
+
+                    The size is the homepage's, verbatim: 180/1603 = 11.229cqw
+                    with a 28px floor, the scale PillarBars runs the same three
+                    names at. One clamp for every width, as there, rather than a
+                    breakpoint pair — so a programme's name is the same size
+                    wherever you meet it. The floor is a legibility backstop
+                    only; the ratio carries "GROUNDSWELL", the longest of the
+                    three, inside a 320 screen on its own. */}
+                <h2
+                    class={`${p.titleBg} ${p.titleText} sticky top-16 z-30 w-full border-b px-2 pb-0.5 text-[clamp(28px,11.229cqw,180px)] md:top-0 text-black/80`}
+                >
+                    {p.title}
+                </h2>
+
+                <div class="flex w-full flex-col md:min-h-[67.374cqw] md:flex-row">
+                    <div
+                        class:list={[
+                            "aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2",
+                            p.imageFirst ? "md:order-1 md:border-r" : "md:order-2",
+                        ]}
+                    >
+                        <Img
+                            name={p.image}
+                            class="saturate-120 contrast-120"
+                            alt={`${p.title} in session`}
+                        />
+                    </div>
+
+                    <div
+                        class:list={[
+                            "flex w-full flex-col justify-between p-4 md:w-1/2 md:p-[2.5%]",
+                            p.imageFirst ? "md:order-2" : "md:order-1 md:border-r",
+                        ]}
+                    >
+                        <div class="flex flex-col gap-5">
+                            {p.body.map((para) => (
+                                <p class="font-sans text-[clamp(18px,2.246cqw,36px)] leading-none tracking-[0em]">
+                                    {para}
+                                </p>
+                            ))}
+                        </div>
+
+                        <div class="mt-10 md:mt-0">
+                            <span class="block h-px w-full bg-black" />
+                            <div class="flex gap-[6%] pt-2">
+                                <span class="shrink-0 font-sans text-[14px] leading-[1.3] md:text-[clamp(12px,1.123cqw,18px)]">
+                                    INFO
+                                </span>
+                                {/* INFO is a list of segments rather than one
+                                    string so an account name can be a link
+                                    without breaking the sentence around it.
+                                    `hl-link` sets `position: relative`, which
+                                    is all its marker needs to work inline.
+
+                                    The marker alone is a hover state, and there
+                                    is no hover on a touch screen, so a link
+                                    buried mid-sentence needs to read as one at
+                                    rest too — hence the rule under it, the same
+                                    hairline the sidebar sets its inline links
+                                    with. It stays legible when the pink wipes
+                                    across: `.hl-label` is positioned, so the
+                                    text and its underline paint over the
+                                    marker. */}
+                                <p class="font-sans text-[clamp(14px,1.497cqw,24px)] leading-[1.1]">
+                                    <RichText parts={p.info} />
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        ))
+    }
+</Layout>

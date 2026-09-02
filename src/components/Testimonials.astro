@@ -1,0 +1,132 @@
+---
+// Figma "Testimonials": two white quote cards on a hairline graph-paper grid,
+// each with a "Read full testimonial" trigger hung underneath it.
+//
+// Unlike ABOUT / OFFERINGS / RESOURCES this section carries no SectionBand —
+// the frame sets its own title small and centred in Neue Haas rather than as a
+// full-bleed display band, so the heading is part of the section here.
+import { testimonials } from "../data/testimonials.js";
+
+// Ratios are measured against the 1603px content column, as everywhere else:
+// gutter 182/1603, card gap 19/1603, card padding 20/1603, grid pitch 66.67/1603.
+// The cards are deliberately not equal height — they hug their quote and hang
+// from a shared top edge, so the row is `items-start`.
+//
+// The stacked (mobile) gaps are fixed rem, not the `%` used elsewhere here: a
+// percentage row-gap resolves against the container's height, which is
+// indefinite once the cards stack, so `gap-[6%]` computes to 0 and the cards
+// collide. Percentage padding and margin are width-based and stay safe.
+---
+
+{
+    /* The clip keeps the graph paper inside the section and the overlay card's
+       stamp-in from bleeding past it. `overflow-clip`, not `overflow-hidden` —
+       hidden still creates a scroll container, and focusing anything inside the
+       card makes the browser scroll the section's contents to reveal it,
+       dragging the whole section off its own box. Clip has no scrollport. */
+}
+<section class="relative w-full overflow-clip border-t bg-paper md:aspect-[1603/1080]">
+    {
+        /* The graph paper is drawn rather than tiled as an image: two repeating
+           gradients, one hairline per 66.67px cell. Below md the cqw pitch would
+           collapse to ~16px cells, so the pitch floors at 28px. */
+    }
+    <div
+        class="pointer-events-none absolute inset-0"
+        style="
+            background-image:
+                repeating-linear-gradient(to right, rgb(0 0 0 / 0.2) 0 1px, transparent 1px var(--cell)),
+                repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.2) 0 1px, transparent 1px var(--cell));
+            --cell: max(28px, 4.159cqw);
+        "
+        aria-hidden="true"
+    >
+    </div>
+
+    <div class="relative w-full">
+        <h2
+            class="pt-20 text-center font-sans font-medium text-black/90 normal-case leading-none text-[clamp(22px,2.495cqw,40px)] md:pt-[9.657cqw]"
+        >
+            Testimonials
+        </h2>
+
+        <div
+            class="mt-12 flex flex-col items-start gap-16 px-[8%] pb-24 md:mt-[5.315cqw] md:flex-row md:gap-[1.185cqw] md:px-[11.354cqw] md:pb-0"
+        >
+            {
+                testimonials.map((t, i) => (
+                    <div class="w-full md:w-0 md:flex-1">
+                        <figure class="flex w-full flex-col gap-5 border border-b-2 bg-white p-[4%] md:gap-[1.248cqw] md:p-[1.248cqw]">
+                            <blockquote class="text-[clamp(22px,2.495cqw,40px)] leading-none text-black/90">
+                                {t.quote}
+                            </blockquote>
+                            <figcaption class="text-[clamp(14px,1.497cqw,24px)] leading-none text-black/90">
+                                {t.name}
+                                <span class="mt-[1em] block whitespace-pre-line">{t.lines}</span>
+                            </figcaption>
+                        </figure>
+                        {/* A disclosure, not a link: it reveals copy already on
+                            the page rather than navigating anywhere. */}
+                        <button
+                            type="button"
+                            data-testimonial-open={i}
+                            aria-expanded="false"
+                            aria-controls={`testimonial-${i}`}
+                            class="mt-[3%] cursor-pointer text-left text-[clamp(12px,1.123cqw,18px)] leading-none tracking-[-0.02em] text-black/90 hover:text-pink md:mt-[0.936cqw]"
+                        >
+                            Read full testimonial →
+                        </button>
+                    </div>
+                ))
+            }
+        </div>
+    </div>
+
+    {
+        /* The overlay card: 609 x 809 at (497, 136.5) in the artboard, which is
+           dead centre on both axes — so it is placed by `inset-0 m-auto` rather
+           than by those offsets, and stays centred as the section's height
+           changes. Centring that way also leaves the `translate` property free
+           for the stamp-in; Tailwind's -translate-x-1/2 would have claimed it.
+           Its 74.77% height resolves against the section's used height, which
+           an in-flow child could not take a percentage of at either breakpoint. */
+    }
+    {
+        testimonials.map((t, i) => (
+            <div
+                id={`testimonial-${i}`}
+                data-testimonial-panel={i}
+                role="dialog"
+                aria-modal="false"
+                aria-label={`Full testimonial from ${t.name}`}
+                class="stamp-panel absolute inset-0 m-auto flex h-[74.77%] w-[84%] flex-col gap-5 border border-b-2 bg-yellow p-[4%] md:w-[37.99%] md:gap-[1.248cqw] md:p-[1.248cqw]"
+            >
+                {/* The copy overruns the card in the artboard too — the card is
+                    a fixed height and the quote is as long as it is — so the
+                    body scrolls and the attribution stays on the bottom edge. */}
+                <div class="min-h-0 flex-1 overflow-y-auto">
+                    <div class="flex flex-col gap-[1em] text-[clamp(15px,1.497cqw,24px)] leading-none text-black/90">
+                        {t.full.map((para) => (
+                            <p>{para}</p>
+                        ))}
+                    </div>
+                </div>
+                <p class="shrink-0 text-[clamp(15px,1.497cqw,24px)] leading-none whitespace-pre-line text-black/90 border-t pt-2">
+                    {t.name}
+                    <span class="mt-[1em] block">{t.lines}</span>
+                </p>
+                {/* The artboard draws no close control, so the card is dismissed
+                    by Escape or by clicking off it. This keeps a real one in the
+                    DOM for keyboard and screen-reader users without painting it
+                    over the design until it is focused. */}
+                <button
+                    type="button"
+                    data-testimonial-close
+                    class="sr-only cursor-pointer focus-visible:not-sr-only focus-visible:absolute focus-visible:top-[1.248cqw] focus-visible:right-[1.248cqw] focus-visible:bg-yellow focus-visible:text-[clamp(12px,1.123cqw,18px)] focus-visible:leading-none focus-visible:text-black/90"
+                >
+                    close ×
+                </button>
+            </div>
+        ))
+    }
+</section>

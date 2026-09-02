@@ -1,0 +1,584 @@
+@import "tailwindcss";
+
+/* ---------- Neue Haas Grotesk Display Pro (body / UI) ---------- */
+@font-face {
+    font-family: "Neue Haas Grotesk";
+    src: url("../assets/fonts/NHaasGroteskDSPro-65Md.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Neue Haas Grotesk";
+    src: url("../assets/fonts/NHaasGroteskDSPro-75Bd.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ---------- Review Condensed (display headings) ---------- */
+@font-face {
+    font-family: "Review Condensed";
+    src: url("../assets/fonts/ReviewCondensed-Heavy.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Review Condensed";
+    src: url("../assets/fonts/ReviewCondensed-Black.otf") format("opentype");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ---------- Review (wordmark) ---------- */
+@font-face {
+    font-family: "Review";
+    src: url("../assets/fonts/Review-Black.otf") format("opentype");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@theme {
+    --font-sans: "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-display: "Review Condensed", "Helvetica Neue", Impact, sans-serif;
+    --font-mark: "Review", "Helvetica Neue", sans-serif;
+
+    /* core */
+    --color-paper: #fffef6;
+    /* The sidebar sits a half-step brighter than the page so the rule between
+       them reads as a fold rather than a border. */
+    --color-shell: #fffef6;
+    --color-ink: #000000;
+    /* Type sits a notch off the ink the rules are struck in. Pure black on this
+       paper is harder than the site needs to be; 90% is the house voice for
+       running copy, and display type opts back down to /80 where it wants the
+       lighter touch. Kept separate from --color-ink so the hairlines stay a
+       full-strength stroke. */
+    --color-ink-body: rgb(0 0 0 / 0.9);
+    --color-pink: #ff669e;
+    /* the hero band runs a touch warmer than the UI pink */
+    --color-pink-band: #ff6ca3;
+
+    /* section bands */
+    --color-lime: #afe900;
+    --color-lime-ink: #232f00;
+    --color-gold: #cc9900;
+    --color-blue: #0085cc;
+    --color-purple: #8f6686;
+    --color-teal: #69cfbc;
+    --color-teal-deep: #39936d;
+
+    /* offerings pillars */
+    --color-compass: #c5ff59;
+    --color-catalyst: #adffd2;
+    --color-groundswell: #81c6e5;
+
+    /* report cards */
+    --color-card-pink: #ce758b;
+    --color-card-yellow: #e2d998;
+
+    /* the full-testimonial overlay */
+    --color-yellow: #ffea4d;
+    --color-card-green: #a8d2ab;
+
+    /* about bands */
+    --color-band-green: #bce0c0;
+    --color-band-pink: #e1a2a7;
+    --color-band-rose: #dfad9f;
+}
+
+@layer base {
+    html {
+        background-color: var(--color-paper);
+        color: var(--color-ink-body);
+    }
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-family: var(--font-sans);
+        /* Neue Haas 65 Medium is the default voice of the site; 75 Bold is an
+           accent, opted into with `font-bold`. */
+        font-weight: 500;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    /* Review Condensed Heavy is drawn tight and set solid — 0.8 leading and no
+       tracking is what the display sizes are designed at. */
+    h1,
+    h2,
+    h3 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 0.8;
+        letter-spacing: 0;
+    }
+    /* One stroke for the whole site: 1px solid ink. Tailwind defaults
+       border-color to currentColor, so every rule had to restate `border-black`
+       or drift with whatever colour its section set. Pinning it here makes a
+       bare `border-t` the house rule and keeps the weights from diverging. */
+    *,
+    ::before,
+    ::after {
+        border-color: var(--color-ink);
+    }
+    input::placeholder {
+        color: currentColor;
+        opacity: 1;
+    }
+}
+
+@layer utilities {
+    /* The marker-pen highlight: the inline cousin of the hero's sticker band.
+       Pink by default, --hl to print it in a section's own colour. The padding
+       is what makes it read as a drawn stroke rather than a selection; clone
+       keeps it drawn on every line the phrase wraps onto. */
+    .u-highlight {
+        background-color: var(--hl, var(--color-pink));
+        padding: 0.02em 0.06em 0.06em;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ---------- team cards: hover/focus swaps the name for the bio ----------
+ *
+ * Pointer only. Stacked, the bio is already on the page as its own full-width
+ * strip under the row and the panel is display:none, so a sticky :hover left
+ * over from a tap would blank the name and role with nothing behind them.
+ * `any-hover` rather than `hover`, so a touch screen with a mouse plugged in
+ * still gets the swap. */
+[data-team-card] [data-team-bio] {
+    visibility: hidden;
+}
+
+@media (any-hover: hover) {
+    [data-team-card]:hover [data-team-bio],
+    [data-team-card]:focus-within [data-team-bio] {
+        visibility: visible;
+    }
+    [data-team-card]:hover [data-team-face],
+    [data-team-card]:focus-within [data-team-face] {
+        visibility: hidden;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Print treatment — rosette screen + paper grain (see PrintOverlay.astro)
+ *
+ * Everything here is driven by custom properties so the whole treatment can
+ * be dialled live from devtools without a rebuild.
+ * ------------------------------------------------------------------ */
+:root {
+    --screen-opacity: 0.8;
+    --grain-opacity: 0.1;
+    /* Grain colour. The noise is generated chromatic and desaturated here, so
+       0 = neutral grey grain, 1 = full risograph misregistration speckle. */
+    --grain-chroma: 0;
+    --grain-hue: 0deg;
+    /* Flat stock tint multiplied over the page — warms paper toward newsprint. */
+    --paper-tint: #ff669e;
+    --tint-opacity: 0;
+    /* 60px = the tile's native size, i.e. a ~3px screen ruling. Larger
+       values coarsen the rosette; the tile stays seamless at any size. */
+    --screen-pitch: 50px;
+    --grain-pitch: 200px;
+    /* scroll offset in px, written by motion.js */
+    --print-y: 0;
+}
+
+.print-screen {
+    background-repeat: repeat;
+    background-size: var(--screen-pitch) var(--screen-pitch);
+    background-position: 0 calc(var(--print-y) * -1px);
+    mix-blend-mode: soft-light;
+    opacity: var(--screen-opacity);
+}
+
+.print-grain {
+    background-repeat: repeat;
+    background-size: var(--grain-pitch) var(--grain-pitch);
+    background-position: 0 calc(var(--print-y) * -1px);
+    mix-blend-mode: multiply;
+    opacity: var(--grain-opacity);
+    /* Filter runs before the blend, so chroma/hue stay live CSS vars rather
+       than being baked into the data URI. */
+    filter: saturate(var(--grain-chroma)) hue-rotate(var(--grain-hue));
+    /* fractalNoise stitched into a tile; RGB passes through (feTurbulence's
+       channels are independent, which is what gives the colour speckle) and
+       only alpha is forced opaque. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* Flat stock tint. Sits between the screen and the grain so the grain
+   modulates the tinted result rather than the raw page. */
+.print-tint {
+    background-color: var(--paper-tint);
+    mix-blend-mode: overlay;
+    opacity: var(--tint-opacity);
+}
+
+/* ------------------------------------------------------------------ *
+ * Sticker reveal (see scripts/sticker.js)
+ *
+ * The site is printed matter, not glass: nothing here eases. Every keyframe
+ * is quantised with steps() onto a 12fps grid and every delay is a whole
+ * number of those frames, so the type stamps on in discrete beats — a
+ * flip-book cadence rather than a tween. Change --sticker-fps to retime the
+ * whole system; --sticker-stagger (in frames) retimes one headline.
+ * ------------------------------------------------------------------ */
+:root {
+    --sticker-fps: 15;
+    --sticker-frame: calc(0.8s / var(--sticker-fps));
+    --sticker-stagger: 1;
+}
+
+/* Pre-split, the text is held transparent rather than hidden: the band keeps
+   its final size (it is sized by the type it contains) so nothing reflows when
+   the letters arrive. Gated on .js so a failed script leaves the type legible. */
+.js [data-sticker]:not([data-sticker-ready]) {
+    color: transparent;
+}
+
+.sticker-word {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.sticker-letter {
+    display: inline-block;
+    /* The inline box is taller than the 0.8 line-height the display face is set
+       at, so every letter overhangs its line box by ~0.15em top and bottom —
+       and being positioned, it hit-tests above whatever follows the band. At
+       band sizes that is a hundred-odd pixels of invisible cover over the next
+       block. The glyphs are decoration; the elements around them own the
+       interaction, so take the letters out of hit testing entirely. */
+    pointer-events: none;
+    /* Positioned, so the letters keep painting above the band's
+       pseudo-element. Without this they'd sit on top only while the stamp
+       animation held a transform, then drop behind the block the moment it
+       settled on `transform: none`. */
+    position: relative;
+    /* Keep the glyph's own box out of the transform: letters are laid out
+       first, then animated, so the line never re-measures mid-reveal. */
+    will-change: transform, opacity;
+}
+
+[data-sticker][data-sticker-ready] .sticker-letter {
+    opacity: 0;
+}
+
+[data-sticker][data-sticker-ready][data-sticker-in] .sticker-letter {
+    /* 4 frames long, split across two keyframe segments of 2 steps each = four
+       discrete poses plus the resting one. */
+    animation: sticker-stamp calc(var(--sticker-frame) * 4) steps(1, jump-end) both;
+    /* --sticker-offset holds a whole headline back by N frames, so a stacked
+       pair reads as one continuous run rather than two reveals firing at once. */
+    animation-delay: calc(
+        (var(--i) * var(--sticker-stagger) + var(--sticker-offset, 0) + var(--sticker-lead, 0)) *
+            var(--sticker-frame)
+    );
+}
+
+@keyframes sticker-stamp {
+    0% {
+        opacity: 0;
+        /* the exaggerated pose only ever renders as one held frame, so it can
+           be much further out than a tween would take */
+        transform: translate3d(0, 0.22em, 0) scale(0.72) rotate(calc(var(--r, 0deg) * 2));
+    }
+    50% {
+        opacity: 1;
+        transform: translate3d(0, -0.03em, 0) scale(1) rotate(calc(var(--r, 0deg) * -1));
+    }
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ---------- the band itself wipes in, then the letters land on it ----------
+ *
+ * On the hero the coloured block is not the element's own background but a
+ * pseudo-element, which is the whole point: a background can't be wiped
+ * without moving the type sitting on it. The block drags across in 3 held
+ * frames, and --sticker-lead pushes every letter on the element back by the
+ * same 3 frames, so the sticker is always laid down before it is printed.
+ */
+[data-sticker-band] {
+    position: relative;
+    /* The one number to tune: how many held frames the block takes to drag
+       across. The letters wait exactly this long (--sticker-lead), so the two
+       can never fall out of step. */
+    --band-frames: 5;
+    --sticker-lead: var(--band-frames);
+}
+
+[data-sticker-band]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--band, var(--color-pink-band));
+    transform-origin: 0 50%;
+}
+
+/* Only once the script has taken over — otherwise the band would never paint. */
+[data-sticker-band][data-sticker-ready]::before {
+    transform: scaleX(0);
+}
+
+[data-sticker-band][data-sticker-ready][data-sticker-in]::before {
+    animation: sticker-band calc(var(--sticker-frame) * var(--band-frames)) both;
+    /* Set apart from the shorthand on purpose: if an engine won't take a var()
+       inside steps() it drops this one declaration and the band still wipes,
+       just eased — rather than invalidating the shorthand and never painting. */
+    animation-timing-function: steps(var(--band-frames), jump-end);
+    animation-delay: calc(var(--sticker-offset, 0) * var(--sticker-frame));
+}
+
+@keyframes sticker-band {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sticker-letter {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    [data-sticker-band]::before {
+        animation: none !important;
+        transform: none !important;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Resource cards (WIKI / REPORTS) — the artwork lifts off the page on hover.
+ *
+ * Same 12fps grid as the sticker reveal: a 3-frame stepped transition, so the
+ * card jumps to the lifted pose in three held positions rather than gliding.
+ * The pivot is the bottom edge, which makes it read as a print being peeled up
+ * off the sheet instead of a card floating. The two cards tilt away from the
+ * centre rule (--tilt is flipped on the right-hand one) so the pair opens like
+ * a spread rather than leaning the same way.
+ * ------------------------------------------------------------------ */
+[data-resource-art] {
+    transform-origin: 50% 100%;
+    transition: transform calc(var(--sticker-frame) * 3) steps(3, jump-end);
+    will-change: transform;
+}
+
+/* Pointer devices only — on touch, :hover latches after a tap and the card
+   would stay lifted until something else is tapped. */
+@media (hover: hover) {
+    [data-resource]:hover [data-resource-art] {
+        transform: translate3d(0, var(--lift, -2.2%), 0) rotate(var(--tilt, -1.6deg));
+    }
+}
+
+[data-resource]:focus-visible [data-resource-art] {
+    transform: translate3d(0, var(--lift, -2.2%), 0) rotate(var(--tilt, -1.6deg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-resource-art] {
+        transition: none;
+    }
+    [data-resource]:hover [data-resource-art],
+    [data-resource]:focus-visible [data-resource-art] {
+        transform: none;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Highlighted links — the marker-pen block, used by the navs and the footer.
+ *
+ * The colour is set per link (--hl); the sidebar and mobile menu give each
+ * item the colour its own section is printed in on the homepage, so the nav
+ * doubles as a key to the page, and everything else falls back to house pink.
+ * The block wipes in from the left on the shared 12fps grid — three held
+ * frames, like a marker pen dragged across in one stroke.
+ *
+ * Ink stays black throughout: the lime and gold are far too light to set type
+ * in on paper, so state is carried by the block, never by the letterforms.
+ * ------------------------------------------------------------------ */
+.hl-link {
+    position: relative;
+    width: fit-content;
+    --hl: var(--color-pink);
+}
+
+.hl-mark {
+    position: absolute;
+    /* bled past the glyphs so it reads as a drawn stroke, not a tight box */
+    inset: -0.1em -0.14em -0.12em;
+    background-color: var(--hl);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform calc(var(--sticker-frame) * 3) steps(3, jump-end);
+}
+
+.hl-label {
+    /* lifts the type over the block without needing a z-index on the link */
+    position: relative;
+}
+
+@media (hover: hover) {
+    .hl-link:hover .hl-mark {
+        transform: scaleX(1);
+    }
+}
+
+/* :active carries touch — there is no hover on a touch screen, so the stroke
+   wipes across under the thumb as the tap lands. .is-current holds the block
+   lit on the page you are already on. */
+.hl-link:active .hl-mark,
+.hl-link:focus-visible .hl-mark,
+.hl-link.is-current .hl-mark {
+    transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hl-mark {
+        transition: none;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Stepped disclosure — the offerings accordion (PillarBars.astro) and the
+ * nav's resources group (Sidebar/MobileBar).
+ *
+ * 0fr -> 1fr on a grid row, so the panel opens to whatever its copy needs with
+ * no height measured in JS and nothing to recompute on resize. Stepped like
+ * everything else: four held frames, so the bar grows in chunks.
+ * ------------------------------------------------------------------ */
+.disclosure {
+    display: grid;
+    /* Open by default so the copy is readable with no JS; the script's .js flag
+       is what collapses them. */
+    grid-template-rows: 1fr;
+}
+
+.js .disclosure {
+    grid-template-rows: 0fr;
+    /* visibility, delayed by the full duration, keeps the collapsed panel out
+       of the tab order without cutting the closing animation short — a link
+       nobody can see is still focusable at 0fr. */
+    visibility: hidden;
+    transition:
+        grid-template-rows calc(var(--sticker-frame) * 4) steps(4, jump-end),
+        visibility 0s linear calc(var(--sticker-frame) * 4);
+}
+
+/* The row has to clip, or the copy shows through the collapsed bar. */
+.disclosure > * {
+    overflow: hidden;
+}
+
+.js .disclosure[data-open] {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition:
+        grid-template-rows calc(var(--sticker-frame) * 4) steps(4, jump-end),
+        visibility 0s;
+}
+
+.pillar-plus {
+    transition: rotate calc(var(--sticker-frame) * 2) steps(2, jump-end);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .js .disclosure,
+    .js .disclosure[data-open],
+    .pillar-plus {
+        transition: none;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Stamped panels — the full testimonial over the testimonials sheet, and the
+ * land acknowledgement over the footer's contact column.
+ *
+ * Stamps in rather than sliding: a short rise onto the same 15fps grid as the
+ * letter reveal, five frames, no easing. Only `translate` and `opacity` move,
+ * so the card is never laid out twice.
+ *
+ * Not .js-gated the way `.disclosure` is — a disclosure has to fall open when
+ * the script never runs, but a card that covers the copy under it must not.
+ * Nothing can open one without JS, so the triggers are hidden in that case too.
+ * ------------------------------------------------------------------ */
+.stamp-panel {
+    translate: 0 6%;
+    opacity: 0;
+    /* Delayed by the full duration so the card finishes leaving before it drops
+       out of the tab order — same reason as .disclosure. */
+    visibility: hidden;
+    transition:
+        translate calc(var(--sticker-frame) * 5) steps(5, jump-end),
+        opacity calc(var(--sticker-frame) * 5) steps(5, jump-end),
+        visibility 0s linear calc(var(--sticker-frame) * 5);
+}
+
+.stamp-panel[data-open] {
+    translate: 0 0;
+    opacity: 1;
+    visibility: visible;
+    transition:
+        translate calc(var(--sticker-frame) * 5) steps(5, jump-end),
+        opacity calc(var(--sticker-frame) * 5) steps(5, jump-end),
+        visibility 0s;
+}
+
+/* The newsletter card's scrim. It fades on the same clock as the stamp but
+   without the steps: the card arrives in frames like a stamp being pressed,
+   and a backdrop that flickered along with it would read as a fault rather
+   than as a technique. `pointer-events` is what makes it the click-off target
+   only while it is up. */
+.newsletter-scrim {
+    transition:
+        opacity calc(var(--sticker-frame) * 5) linear,
+        visibility 0s linear calc(var(--sticker-frame) * 5);
+    visibility: hidden;
+}
+
+.newsletter-scrim[data-open] {
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+    transition:
+        opacity calc(var(--sticker-frame) * 5) linear,
+        visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .newsletter-scrim,
+    .newsletter-scrim[data-open] {
+        transition: none;
+    }
+}
+
+html:not(.js) [data-testimonial-open],
+html:not(.js) [data-land-open] {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stamp-panel,
+    .stamp-panel[data-open] {
+        transition: none;
+    }
+}

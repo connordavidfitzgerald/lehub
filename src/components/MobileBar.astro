@@ -1,0 +1,71 @@
+---
+// Mobile sticky top bar (Figma: 393 x 64) + full-screen menu overlay.
+import { nav, currentPath } from "../data/nav.js";
+const path = currentPath(Astro.url);
+
+// The menu is a flat list: there is no sidebar column to indent into here, so
+// a group stands aside for the pages it holds — resources becomes reports and
+// wiki, at the top level, each keeping the colour the group carries.
+const items = nav.flatMap((item) =>
+    item.children ? item.children.map((child) => ({ ...child, hl: item.hl })) : [item],
+);
+---
+
+<header
+    class="md:hidden sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-shell px-4"
+>
+    <a href="/" class="font-mark text-[38px] leading-none tracking-[-0.02em]"
+        >Le HUB</a
+    >
+    <button
+        type="button"
+        data-menu-toggle
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        class="bg-pink px-4 py-1.5 font-sans text-[15px] leading-none"
+    >
+        <span data-menu-label>menu</span>
+    </button>
+</header>
+
+<div
+    id="mobile-menu"
+    data-menu-panel
+    hidden
+    class="md:hidden fixed inset-0 top-16 z-40 flex flex-col justify-between bg-shell px-4 pb-6 pt-8"
+>
+    <nav class="flex flex-col gap-1 font-display text-[52px] uppercase leading-[0.88]">
+        {
+            items.map((item, i) => (
+                <a
+                    href={item.href}
+                    data-menu-item
+                    style={`--i:${i};--hl:${item.hl}`}
+                    class:list={["hl-link", path === item.href && "is-current"]}
+                >
+                    <span class="hl-mark" aria-hidden="true" />
+                    <span class="hl-label">{item.label}</span>
+                </a>
+            ))
+        }
+    </nav>
+    <div class="flex flex-col text-[13px] leading-[1.3]">
+        <span class="h-px w-full bg-black"></span>
+        <p class="py-2.5">
+            Next course:<br />Groundswell (May 18th)<br />
+            <span>Sign up <a href="#" class="underline underline-offset-2">here</a>↗</span>
+        </p>
+        <span class="h-px w-full bg-black"></span>
+        <form class="flex flex-col gap-1.5 pt-2.5" data-newsletter-open>
+            <label for="nl-mobile">Subscribe to our newsletter:</label>
+            <input
+                id="nl-mobile"
+                type="email"
+                placeholder="Email"
+                data-newsletter-field
+                class="w-full bg-transparent pb-2.5 outline-none focus:text-black"
+            />
+        </form>
+        <span class="h-px w-full bg-black"></span>
+    </div>
+</div>

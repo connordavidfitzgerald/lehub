@@ -1,0 +1,70 @@
+---
+import "../styles/global.css";
+import Sidebar from "../components/Sidebar.astro";
+import MobileBar from "../components/MobileBar.astro";
+import Footer from "../components/Footer.astro";
+import PrintOverlay from "../components/PrintOverlay.astro";
+import Newsletter from "../components/Newsletter.astro";
+import { Image } from "astro:assets";
+
+import sunset from "../assets/images/Sunset.png";
+
+interface Props {
+    title?: string;
+    /** /contact IS the footer block, so it must not be repeated. */
+    footer?: boolean;
+}
+const { title = "Le Hub — Training centre for organizers", footer = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content={Astro.generator} />
+        <meta
+            name="description"
+            content="Le Hub is a bilingual training centre for organizers and grassroots groups across so-called Canada and Québec."
+        />
+        <title>{title}</title>
+        <script is:inline>
+            document.documentElement.classList.add("js");
+        </script>
+    </head>
+    <!-- min-h-svh + a growing main is the sticky-footer pattern: it lets a page
+         with less content than the window (/contact is a band and the contact
+         block, nothing else) fill the screen by giving the slack to its last
+         block, without any section being *sized* on the viewport. Every section
+         keeps its own height; only the leftover is shared out. -->
+    <body class="flex min-h-svh flex-col bg-paper">
+        <div
+            class="fixed top-0 left-0 w-screen h-screen z-10000 pointer-events-none mix-blend-soft-light opacity-0"
+        >
+            <Image src={sunset} class="object-cover w-full h-full" alt="" />
+        </div>
+        <MobileBar />
+        <Sidebar />
+        <!-- @container: the Figma ratios are measured against the 1603px content
+             column, so sections size themselves in cqw of main, not vw — a
+             section's height comes from the column it sits in, never from how
+             tall the window happens to be. Only the heroes are on the viewport.
+             The house block is 1080/1603: `aspect-[1603/1080]` where the block
+             frames pictures, `min-h-[67.374cqw]` where it holds copy that has
+             to be able to outgrow it. -->
+        <main class="@container flex w-full min-w-0 grow flex-col md:ml-[max(16.56vw,220px)] md:w-auto">
+            <slot />
+            {footer && <Footer />}
+        </main>
+        <PrintOverlay />
+        {/* Root-level, not inside `main`: `main` is a `@container`, and a
+            container is the containing block for its fixed descendants, so the
+            card would centre on the document rather than the viewport. */}
+        <Newsletter />
+        <script>
+            import "../scripts/ui.js";
+        </script>
+    </body>
+</html>

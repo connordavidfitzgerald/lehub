@@ -1,0 +1,51 @@
+---
+// Home offerings block: the three programmes as full-width accordion bars.
+//
+// Each bar is a sticker in its programme's colour, and its panel carries the
+// same colour, so opening one reads as that sticker growing rather than as a
+// drawer sliding out from under it. Only one is open at a time (see ui.js).
+//
+// The label runs on the same pure-cqw scale as the SectionBand above it — 180/1603
+// = 11.229cqw — so the bars keep their 1:2 relation to the band at every width.
+// The floor is a legibility backstop only: at a real 69px minimum "GROUNDSWELL"
+// measures 412px and ran off the side of a phone.
+import { pillars } from "../data/pillars.js";
+---
+
+<div class="w-full" data-pillars>
+    {
+        pillars.map((p) => (
+            <div class={`${p.bg} not-first:border-t`}>
+                <button
+                    type="button"
+                    data-pillar={p.key}
+                    aria-expanded="false"
+                    aria-controls={`pillar-${p.key}`}
+                    class="group flex w-full cursor-pointer items-center justify-between gap-4 px-2 pb-[0.033em] text-left font-display text-[clamp(28px,11.229cqw,180px)] font-extrabold uppercase leading-[0.8] text-black/80"
+                >
+                    <span>{p.label}</span>
+                    <span class="pillar-plus shrink-0 font-sans text-[clamp(18px,2.32cqw,38px)] leading-none group-aria-expanded:rotate-45">
+                        +
+                    </span>
+                </button>
+
+                <div id={`pillar-${p.key}`} data-pillar-panel={p.key} class="disclosure">
+                    <div>
+                        <div class="flex flex-col gap-[1em] px-3 pt-2 pb-3 text-black/90">
+                            <p class="text-[clamp(14px,2.32cqw,38px)] leading-none w-full">
+                                {p.blurb}
+                            </p>
+                            <a
+                                href="/offerings"
+                                class="hl-link text-[clamp(14px,1.497cqw,24px)] leading-none tracking-[-0.02em]"
+                            >
+                                <span class="hl-mark" aria-hidden="true" />
+                                <span class="hl-label">Learn more →</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ))
+    }
+</div>

@@ -1,0 +1,116 @@
+---
+// Figma "Team Grid — Interactive": 4 x 2 checkerboard of name-cards and
+// portraits. Hovering a card cross-fades the name/role out and the bio in.
+import Img from "./Img.astro";
+import { team } from "../data/team.js";
+
+// DOM order is the 4-up checkerboard: card, photo, card, photo / photo, card,
+// photo, card — with each person's stacked bio strip sitting next to their own
+// card, where it reads in source order. Rows alternate which side the card
+// falls on, which is what makes the checkerboard.
+//
+// Stacked two-up that sequence pairs each card with the *next* person's photo
+// on two of the rows, so `order` re-sequences the cells below md into strict
+// alternation instead — name left / photo right, then photo left / name right —
+// with the bio strip spanning the full width under each pair. There is no hover
+// on a touch screen, so the bio cannot hide behind the card there.
+//
+// Tailwind scans for literal class names, so a template-built `order-${n}` would
+// never be generated. The whole set is spelled out here and indexed into; each
+// name still appears verbatim in the source, which is all the scanner needs.
+const ORDER =
+    "order-1 order-2 order-3 order-4 order-5 order-6 order-7 order-8 order-9 order-10 order-11 order-12 order-13 order-14 order-15 order-16 order-17 order-18 order-19 order-20 order-21 order-22 order-23 order-24".split(
+        " ",
+    );
+
+interface Props {
+    /** Defaults to the staff; the advisory board passes its own list. */
+    people?: typeof team;
+}
+const { people = team } = Astro.props;
+
+// The two layouts alternate on different beats, so they are two rules. Source
+// order is the desktop one: the checkerboard turns over every *row*, i.e. every
+// two people. The `order` numbers are the stacked one, which turns over every
+// *person* — strict left/right alternation down the column. At md the strips go
+// away and `md:order-none` hands the grid back to source order.
+const cells = people.flatMap((_, i) => {
+    const rowCardFirst = Math.floor(i / 2) % 2 === 0;
+    const stackCardFirst = i % 2 === 0;
+    const card = { kind: "card", i, order: ORDER[i * 3 + (stackCardFirst ? 0 : 1)] };
+    const photo = { kind: "photo", i, order: ORDER[i * 3 + (stackCardFirst ? 1 : 0)] };
+    const bio = { kind: "bio", i, order: ORDER[i * 3 + 2] };
+    return rowCardFirst ? [card, photo, bio] : [photo, card, bio];
+});
+---
+
+<!-- The seams are a 1px gutter over a black ground rather than borders on the
+     cells: the column count changes at md, and nth-child rules for "not the
+     last column" would have to change with it. With no padding on the grid the
+     ground shows only between cells, so the rule above the grid stays the
+     band's and the rule below it stays the next section's, as everywhere else.
+     Every cell has to stay opaque for this to hold — the photos fill theirs and
+     the cards carry bg-paper. -->
+<div class="grid w-full grid-cols-2 gap-px bg-black md:grid-cols-4">
+    {
+        cells.map((cell) => {
+            const person = people[cell.i];
+            if (cell.kind === "photo") {
+                return (
+                    <div
+                        class={`${cell.order} aspect-[400/540] w-full overflow-hidden md:order-none`}
+                    >
+                        <Img name={person.photo} alt={person.name.replace(/\n/g, " ")} />
+                    </div>
+                );
+            }
+
+            // 3.75% of the full width is the same inset as the card's 7.5% of
+            // a half-width cell, so the copy lines up with the name above it.
+            if (cell.kind === "bio") {
+                return (
+                    <div class={`${cell.order} col-span-2 bg-paper p-[3.75%] md:hidden`}>
+                        <p class="font-sans text-[15px] leading-[1.05] tracking-[-0.01em] text-black/90">
+                            {person.bio}
+                        </p>
+                    </div>
+                );
+            }
+
+            return (
+                <div
+                    data-team-card
+                    class={`${cell.order} group relative aspect-[400/540] w-full cursor-pointer overflow-hidden bg-paper p-[7.5%] md:order-none`}
+                >
+                    {/* The name and pronouns are centred on the whole card as
+                        one block, not on the space left over above the role, so
+                        they hold the same optical centre whether the role runs
+                        to one line or three. */}
+                    <div data-team-face class="relative h-full">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <h3 class="text-[36px] whitespace-pre-line text-black/90 md:text-[clamp(20px,2.995cqw,48px)]">
+                                {person.name}
+                            </h3>
+                            <p class="mt-[0.7em] font-sans text-[13px] leading-none text-black/90 md:text-[clamp(9px,1.123cqw,18px)]">
+                                ({person.pronouns})
+                            </p>
+                        </div>
+                        <p class="absolute inset-x-0 bottom-0 text-center font-sans text-[15px] leading-none whitespace-pre-line text-black/90 md:text-[clamp(11px,1.497cqw,24px)]">
+                            {person.role}
+                        </p>
+                    </div>
+                    {/* Same shape as the testimonial overlay: the bio is as long as it is
+                        and the card is a fixed ratio, so the copy scrolls inside it
+                        rather than being clipped at the bottom edge. */}
+                    <div data-team-bio class="absolute inset-0 hidden flex-col bg-paper p-[7.5%] md:flex">
+                        <div class="min-h-0 flex-1 overflow-y-auto">
+                            <p class="font-sans text-[clamp(15px,1.497cqw,24px)] leading-[1.05] tracking-[-0.01em] text-black/90">
+                                {person.bio}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        })
+    }
+</div>
