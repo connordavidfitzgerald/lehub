@@ -1,0 +1,115 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Img from "../../components/Img.astro";
+import RichText from "../../components/RichText.astro";
+import SectionBand from "../../components/SectionBand.astro";
+import { getPage } from "../../lib/queries.js";
+import { programColor } from "../../lib/programColors.js";
+
+export async function getStaticPaths() {
+    const { localePaths } = await import("../../lib/i18n.js");
+    return localePaths();
+}
+
+const { locale } = Astro.props;
+const { settings, nav, ui, page, programs } = await getPage("offerings", locale);
+---
+
+<Layout title={page?.title} locale={locale} settings={settings} nav={nav} ui={ui}>
+    <section class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px]">
+        <Img
+            image={page?.heroImage}
+            alt={page?.heroAlt}
+            width={1600}
+            loading="eager"
+            label="hero-studio.jpg"
+        />
+    </section>
+
+    <!-- Wrapped so the band gets the rule above it the same way every other
+         block on the site does — from the section it sits in. -->
+    <section class="w-full border-t">
+        <SectionBand title={page?.bandLabel} bg="bg-gold" text="text-black/80" />
+    </section>
+
+    {
+        programs.map((p, i) => (
+
+            <section
+                id={p.key}
+                class:list={["w-full scroll-mt-16 md:scroll-mt-0", i > 0 && "border-t"]}
+            >
+
+                <h2
+                    class:list={[
+                        programColor(p.key).bg,
+                        programColor(p.key).text,
+                        "sticky top-16 z-30 w-full border-b px-2 pb-0.5 text-[clamp(28px,11.229cqw,180px)] md:top-0 text-black/80",
+                    ]}
+                >
+                    {p.title}
+                </h2>
+
+                <div class="flex w-full flex-col md:min-h-[67.374cqw] md:flex-row">
+                    <div
+                        class:list={[
+                            "aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2",
+                            p.imageFirst ? "md:order-1 md:border-r" : "md:order-2",
+                        ]}
+                    >
+                        <Img
+                            image={p.image}
+                            class="saturate-120 contrast-120"
+                            alt={`${p.title}`}
+                            label={p.key}
+                        />
+                    </div>
+
+                    <div
+                        class:list={[
+                            "flex w-full flex-col justify-between p-4 md:w-1/2 md:p-[2.5%]",
+                            p.imageFirst ? "md:order-2" : "md:order-1 md:border-r",
+                        ]}
+                    >
+                        <div class="flex flex-col gap-5">
+                            <RichText
+                                value={p.body}
+                                class="font-sans text-[clamp(18px,2.246cqw,36px)] leading-none"
+                                locale={locale}
+                            />
+                        </div>
+
+                        <div class="mt-10 md:mt-0">
+                            <span class="block h-px w-full bg-black" />
+                            <div class="flex gap-[6%] pt-2">
+                                <span class="shrink-0 font-sans text-[14px] leading-[1.3] md:text-[clamp(12px,1.123cqw,18px)]">
+                                    {ui?.info}
+                                </span>
+                                {/* The INFO line is rich text so an address or
+                                    an account name can be a link without
+                                    breaking the sentence around it. `hl-link`
+                                    sets `position: relative`, which is all its
+                                    marker needs to work inline.
+
+                                    The marker alone is a hover state, and there
+                                    is no hover on a touch screen, so a link
+                                    buried mid-sentence needs to read as one at
+                                    rest too — hence the rule under it, the same
+                                    hairline the sidebar sets its inline links
+                                    with. It stays legible when the pink wipes
+                                    across: `.hl-label` is positioned, so the
+                                    text and its underline paint over the
+                                    marker. */}
+                                <RichText
+                                    value={p.info}
+                                    class="font-sans text-[clamp(14px,1.497cqw,24px)] leading-[1.1]"
+                                    locale={locale}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        ))
+    }
+</Layout>

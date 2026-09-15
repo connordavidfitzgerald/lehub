@@ -2,52 +2,44 @@
 // Full-bleed coloured band carrying a page title in Review Condensed.
 //
 // The titles are set, not stamped. The per-letter sticker reveal is the
-// homepage hero's alone now — `data-sticker` is the opt-in, so having none is
-// what keeps every band on the site still.
+// homepage hero's alone — `data-sticker` is the opt-in, so having none is what
+// keeps every band on the site still.
 //
-// `fit` is the homepage treatment: the title is sized to span the full width of
-// the band, so the band's height falls out of the type rather than out of
-// padding — only the constant 12px optical drop under the baseline is added.
-// It is set nowrap: a `fit` size is computed for the title on ONE line, so a
-// multi-word title left to wrap would break onto a second line and take the
-// band's height with it.
+// The title is sized to span the full width of the band, so the band's height
+// falls out of the type rather than out of padding — only the constant 12px
+// optical drop under the baseline is added. It is set nowrap: the size is
+// computed for the title on ONE line, so a multi-word title left to wrap would
+// break onto a second and take the band's height with it.
+//
+// That size used to be a hand-measured cqw passed in per band. It is measured
+// off the font now (see lib/fit.js), which is what lets the same band carry
+// "ABOUT" and "À PROPOS" and come out the right size for each — the words are
+// content and arrive from the CMS in two languages, so a fixed number could
+// only ever have been right for one of them.
+//
 // The band owns the rule UNDER it, the way a section owns the rule above it
 // (`border-t`), so every horizontal seam on a page is drawn exactly once and
 // whatever follows a band never needs a top border of its own. `rule={false}`
 // is for the one case that inverts: when the band is the last thing on the
 // page, the footer beneath it already draws its own top rule, and the band
 // standing on that would lay a second stroke on the same seam.
-//
-// Sizes are given in cqw of the nearest container (main), which is
-// where the Figma ratios were measured — ABOUT at 591/1603 = 36.9cqw, and so on.
+import { bandSize } from "../lib/fit.js";
+
 interface Props {
     title: string;
     bg: string;
     text?: string;
-    size?: string;
-    fit?: boolean;
     /** Drop the rule under the band when what follows already draws one. */
     rule?: boolean;
 }
-const {
-    title,
-    bg,
-    text = "text-black",
-    size = "text-[clamp(52px,11.229cqw,180px)]",
-    fit = false,
-    rule = true,
-} = Astro.props;
-const edge = rule ? "border-b" : "";
+const { title, bg, text = "text-black", rule = true } = Astro.props;
 ---
 
-{
-    fit ? (
-        <div class={`${bg} ${text} w-full ${edge}`}>
-            <h2 class={`${size} w-full pb-[0.75cqw] text-center text-nowrap`}>{title}</h2>
-        </div>
-    ) : (
-        <div class={`${bg} ${text} w-full ${edge} px-[1%] py-[0.2%]`}>
-            <h1 class={size}>{title}</h1>
-        </div>
-    )
-}
+<div class:list={[bg, text, "w-full", rule && "border-b"]}>
+    {/* Inline, not a Tailwind class: v4 generates arbitrary values by scanning
+        source for literal strings, so a class built from a computed number is
+        one it never sees and never emits. */}
+    <h2 class="w-full pb-[0.75cqw] text-center text-nowrap" style={`font-size:${bandSize(title)}`}>
+        {title}
+    </h2>
+</div>

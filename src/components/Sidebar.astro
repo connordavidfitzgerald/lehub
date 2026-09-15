@@ -1,39 +1,41 @@
 ---
-// Desktop-only fixed sidebar. Figma: 318 / 1920 = 16.56% of viewport width,
-// 20px padding all round, so the content box is 278px at the 1920 artboard.
-import { nav, currentPath, isCurrent } from "../data/nav.js";
-import { ACTION, TRAP } from "../data/newsletter.js";
-import Arrow from "./Arrow.astro";
-const path = currentPath(Astro.url);
 
-// 14px at the 1920 artboard — the whole footer block of the sidebar is set at
-// one size, with 10px (0.52vw) gaps and hairline rules between the groups.
-const fine = "text-[clamp(14px,0.75vw,18px)] leading-none tracking-[-0.01em]";
+import { LOCALES, LOCALE_CODE, barePath, isCurrent, localize, swapLocale } from "../lib/i18n.js";
+import Arrow from "./Arrow.astro";
+
+interface Props {
+    nav: any[];
+    settings: any;
+    ui: any;
+    locale: string;
+}
+const { nav = [], settings, ui, locale } = Astro.props;
+const path = barePath(Astro.url.pathname);
+const fine = "text-[clamp(14px,0.75vw,18px)] leading-none";
 ---
 
 <aside
+    style="view-transition-name: sidebar"
     class="@container hidden md:flex fixed top-0 left-0 z-50 h-screen w-[max(16.56vw,220px)] flex-col justify-between border-r bg-shell p-[max(1.04vw,14px)]"
 >
     <div class="flex flex-col gap-[max(1.04vw,14px)]">
-        <!-- 29.17cqw is measured, not eyeballed: "Le HUB" is 3.428em wide in Review
-             Black at -0.04em tracking, so it spans the sidebar's content box exactly. -->
-        <a href="/" class="font-mark leading-[0.9] tracking-[-0.04em] text-[29.17cqw]">Le HUB</a>
+        <a
+            href={localize("/", locale)}
+            class="font-mark leading-[0.9] tracking-[-0.04em] text-[29.17cqw]">Le HUB</a
+        >
         <nav
-            class="flex flex-col text-[clamp(22px,1.25vw,28px)] leading-none tracking-[-0.01em] lowercase"
+            class="flex flex-col text-[clamp(22px,1.25vw,28px)] leading-none lowercase"
         >
             {
                 nav.map((item) =>
                     item.children ? (
-                        // Open on load when you are already inside the group,
-                        // so the page you are on is never hidden behind a
-                        // collapsed parent.
                         <div class="flex flex-col">
                             <button
                                 type="button"
                                 data-nav-toggle
                                 aria-expanded={String(isCurrent(item, path))}
                                 aria-controls={`nav-desktop-${item.label}`}
-                                style={`--hl:${item.hl}`}
+                                style={`--hl:${item.highlight}`}
                                 class:list={[
                                     "hl-link w-fit cursor-pointer text-left lowercase",
                                     isCurrent(item, path) && "is-current",
@@ -51,8 +53,14 @@ const fine = "text-[clamp(14px,0.75vw,18px)] leading-none tracking-[-0.01em]";
                                     <div class="flex flex-col gap-[0.15em] pt-[0.15em] pl-[0.8em]">
                                         {item.children.map((child) => (
                                             <a
-                                                href={child.href}
-                                                style={`--hl:${item.hl}`}
+                                                href={
+                                                    child.external
+                                                        ? child.href
+                                                        : localize(child.href, locale)
+                                                }
+                                                target={child.external ? "_blank" : undefined}
+                                                rel={child.external ? "noopener" : undefined}
+                                                style={`--hl:${item.highlight}`}
                                                 class:list={[
                                                     "hl-link w-fit",
                                                     path === child.href && "is-current",
@@ -68,8 +76,8 @@ const fine = "text-[clamp(14px,0.75vw,18px)] leading-none tracking-[-0.01em]";
                         </div>
                     ) : (
                         <a
-                            href={item.href}
-                            style={`--hl:${item.hl}`}
+                            href={localize(item.href, locale)}
+                            style={`--hl:${item.highlight}`}
                             class:list={["hl-link w-fit", path === item.href && "is-current"]}
                         >
                             <span class="hl-mark" aria-hidden="true" />
@@ -83,30 +91,27 @@ const fine = "text-[clamp(14px,0.75vw,18px)] leading-none tracking-[-0.01em]";
 
     <div class={`flex flex-col gap-[max(0.52vw,7px)] ${fine}`}>
         <span class="h-px w-full bg-black"></span>
-        <p class="leading-none">
-            Next course:<br />Groundswell (May 18th)<br /><br />
-            {/* A button, not a link: it opens the sign-up card rather than
-                navigating, and it was pointing at `#` — nowhere — before. */}
+        <p class="leading-none whitespace-pre-line">
+            {settings?.nextCourse}<br /><br />
+
             <span class="inline-block"
-                >Sign up <button
+                >{ui?.signUp}{" "}<button
                     type="button"
                     data-newsletter-open
                     class="cursor-pointer underline underline-offset-2 decoration-1 hover:text-pink"
-                    >here</button
+                    >{ui?.signUpHere}</button
                 ></span
             >
         </p>
         <span class="h-px w-full bg-black"></span>
-        {/* Posts to the list directly, like the footer's field — the card is
-            what "here" above opens, and sending this one there too would just
-            ask for the address twice. */}
+
         <form
-            action={ACTION}
+            action={settings?.newsletterAction}
             method="post"
             target="_blank"
             class="flex flex-col gap-[max(0.52vw,7px)]"
         >
-            <label for="nl-desktop">Subscribe to our newsletter:</label>
+            <label for="nl-desktop">{settings?.newsletterLabel}</label>
             <div class="flex w-full items-center gap-2">
                 <input
                     id="nl-desktop"
@@ -114,26 +119,57 @@ const fine = "text-[clamp(14px,0.75vw,18px)] leading-none tracking-[-0.01em]";
                     name="EMAIL"
                     required
                     autocomplete="email"
-                    placeholder="Email"
+                    placeholder={ui?.emailPlaceholder}
                     class="min-w-0 flex-1 bg-transparent leading-none outline-none focus:text-black"
                 />
-                {/* Bare, not the footer's pink square: at this size a filled
-                    block would be a button stuck to the side of a hairline
-                    rule. It is the mark alone, taking the row's own colour. */}
                 <button
                     type="submit"
-                    aria-label="Subscribe"
+                    aria-label={ui?.subscribe}
                     class="shrink-0 cursor-pointer leading-none hover:text-pink"
                 >
                     <Arrow class="h-[1em] w-[1em]" />
                 </button>
             </div>
-            {/* Off-screen rather than hidden: a bot fills what it can read, and
-                `display: none` is the one thing they know to skip. */}
             <div class="absolute left-[-5000px]" aria-hidden="true">
-                <input type="text" name={TRAP} tabindex="-1" value="" />
+                <input type="text" name={settings?.newsletterTrap} tabindex="-1" value="" />
             </div>
         </form>
         <span class="h-px w-full bg-black"></span>
+        {/* Both codes, with the one you are on marked and the other a link —
+            rather than the single code the mobile bar shows. At this size a
+            lone "FR" is ambiguous: it could as easily be saying where you are
+            as offering to take you there. The pair answers both at once.
+
+            It is the last line of the column and takes no rule under it: the
+            rules in this block sit above what they introduce, and there is
+            nothing after this to introduce. */}
+        <div class="flex w-fit items-center gap-[0.35em]">
+            {
+                LOCALES.map((code, i) => [
+                    i > 0 ? <span aria-hidden="true" class="opacity-40">/</span> : null,
+                    code === locale ? (
+                        // No colour of its own: left to inherit, it is the
+                        // house body voice, so the language you are in sits at
+                        // the same weight as the lines above it rather than
+                        // striking darker than the copy around it.
+                        <span aria-current="true">{LOCALE_CODE[code]}</span>
+                    ) : (
+                        // `opacity`, not a lighter ink: it dims whatever colour
+                        // is inherited, so the pair stays one step apart if the
+                        // block's colour is ever changed. Focus gets the same
+                        // lift as hover — a keyboard has no pointer to arrive
+                        // with, and this is the last stop in the sidebar.
+                        <a
+                            href={swapLocale(Astro.url.pathname, code)}
+                            hreflang={code}
+                            lang={code}
+                            class="opacity-40 hover:opacity-100 focus-visible:opacity-100"
+                        >
+                            {LOCALE_CODE[code]}
+                        </a>
+                    ),
+                ])
+            }
+        </div>
     </div>
 </aside>

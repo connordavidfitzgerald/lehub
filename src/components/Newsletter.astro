@@ -1,8 +1,14 @@
 ---
 // The newsletter sign-up, as one overlay for the whole site.
 //
-// It posts straight to the list rather than running Mailchimp's embed; see
-// data/newsletter.js for what that endpoint wants and why.
+// It posts straight to the list rather than running Mailchimp's embed. Their
+// classic embed ships a stylesheet, jQuery, and ~600 lines of SMS/country-picker
+// script for a form with a single email field; none of it is needed. The
+// endpoint reads EMAIL and the bot-trap input and answers with its own
+// confirmation page, and posting with `target="_blank"` is what lets that page
+// open in a tab of its own and leave ours where it was — so nothing is fetched
+// from their domain, and there is no third-party JS on the site. The endpoint
+// and the trap's field name both come from the CMS (Site settings ▸ Newsletter).
 //
 // Shaped like the testimonial card — same stamp-in, same hairline border with
 // the heavier bottom edge — but on paper rather than the testimonials' yellow,
@@ -16,8 +22,13 @@
 // back to the viewport. The card is capped at 520px, so it has no need to be
 // fluid.
 
-import { ACTION, TRAP } from "../data/newsletter.js";
 import Arrow from "./Arrow.astro";
+
+interface Props {
+    settings: any;
+    ui: any;
+}
+const { settings, ui } = Astro.props;
 ---
 
 {
@@ -45,18 +56,23 @@ import Arrow from "./Arrow.astro";
             id="newsletter-title"
             class="font-sans font-medium normal-case leading-none text-[20px] md:text-[24px]"
         >
-            Subscribe
+            {ui?.newsletterHeading}
         </h2>
         <button
             type="button"
             data-newsletter-close
             class="shrink-0 cursor-pointer text-[13px] leading-none hover:text-pink"
         >
-            close ×
+            {ui?.close}
         </button>
     </div>
 
-    <form action={ACTION} method="post" target="_blank" class="flex flex-col gap-4">
+    <form
+        action={settings?.newsletterAction}
+        method="post"
+        target="_blank"
+        class="flex flex-col gap-4"
+    >
         {
             /* `items-end` and the square button are the footer field's shape, so
             the overlay reads as that field opened up rather than as a
@@ -69,13 +85,13 @@ import Arrow from "./Arrow.astro";
                 name="EMAIL"
                 required
                 autocomplete="email"
-                placeholder="EMAIL"
+                placeholder={ui?.emailPlaceholder?.toUpperCase()}
                 class="min-w-0 flex-1 bg-transparent font-display text-[34px] font-extrabold uppercase leading-[0.82] text-black/90 outline-none placeholder:text-black/35"
             />
             <button
                 type="submit"
                 class="grid aspect-square w-[46px] shrink-0 cursor-pointer place-items-center bg-pink text-[34px] leading-none text-black/90"
-                aria-label="Subscribe"
+                aria-label={ui?.subscribe}
             >
                 <Arrow />
             </button>
@@ -87,11 +103,9 @@ import Arrow from "./Arrow.astro";
             it can see, and `display: none` is the one thing they know to skip. */
         }
         <div class="absolute left-[-5000px]" aria-hidden="true">
-            <input type="text" name={TRAP} tabindex="-1" value="" />
+            <input type="text" name={settings?.newsletterTrap} tabindex="-1" value="" />
         </div>
 
-        <p class="text-[12px] leading-[1.2] text-black/90">
-            Confirming opens Mailchimp in a new tab. Unsubscribe any time.
-        </p>
+        <p class="text-[12px] leading-[1.2] text-black/90">{settings?.newsletterFinePrint}</p>
     </form>
 </div>

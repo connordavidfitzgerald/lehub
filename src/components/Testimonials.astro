@@ -5,7 +5,14 @@
 // Unlike ABOUT / OFFERINGS / RESOURCES this section carries no SectionBand —
 // the frame sets its own title small and centred in Neue Haas rather than as a
 // full-bleed display band, so the heading is part of the section here.
-import { testimonials } from "../data/testimonials.js";
+import RichText from "./RichText.astro";
+
+interface Props {
+    testimonials: any[];
+    ui: any;
+    locale: string;
+}
+const { testimonials = [], ui, locale } = Astro.props;
 
 // Ratios are measured against the 1603px content column, as everywhere else:
 // gutter 182/1603, card gap 19/1603, card padding 20/1603, grid pitch 66.67/1603.
@@ -47,7 +54,7 @@ import { testimonials } from "../data/testimonials.js";
         <h2
             class="pt-20 text-center font-sans font-medium text-black/90 normal-case leading-none text-[clamp(22px,2.495cqw,40px)] md:pt-[9.657cqw]"
         >
-            Testimonials
+            {ui?.testimonialsHeading}
         </h2>
 
         <div
@@ -72,9 +79,9 @@ import { testimonials } from "../data/testimonials.js";
                             data-testimonial-open={i}
                             aria-expanded="false"
                             aria-controls={`testimonial-${i}`}
-                            class="mt-[3%] cursor-pointer text-left text-[clamp(12px,1.123cqw,18px)] leading-none tracking-[-0.02em] text-black/90 hover:text-pink md:mt-[0.936cqw]"
+                            class="mt-[3%] cursor-pointer text-left text-[clamp(12px,1.123cqw,18px)] leading-none text-black/90 hover:text-pink md:mt-[0.936cqw]"
                         >
-                            Read full testimonial →
+                            {ui?.readFullTestimonial}
                         </button>
                     </div>
                 ))
@@ -98,7 +105,7 @@ import { testimonials } from "../data/testimonials.js";
                 data-testimonial-panel={i}
                 role="dialog"
                 aria-modal="false"
-                aria-label={`Full testimonial from ${t.name}`}
+                aria-label={ui?.fullTestimonialFrom?.replace("{name}", t.name)}
                 class="stamp-panel absolute inset-0 m-auto flex h-[74.77%] w-[84%] flex-col gap-5 border border-b-2 bg-yellow p-[4%] md:w-[37.99%] md:gap-[1.248cqw] md:p-[1.248cqw]"
             >
                 {/* The copy overruns the card in the artboard too — the card is
@@ -106,9 +113,7 @@ import { testimonials } from "../data/testimonials.js";
                     body scrolls and the attribution stays on the bottom edge. */}
                 <div class="rule-scroll min-h-0 flex-1 overflow-y-auto">
                     <div class="flex flex-col gap-[1em] text-[clamp(15px,1.497cqw,24px)] leading-none text-black/90">
-                        {t.full.map((para) => (
-                            <p>{para}</p>
-                        ))}
+                        <RichText value={t.full} locale={locale} />
                     </div>
                 </div>
                 <p class="shrink-0 text-[clamp(15px,1.497cqw,24px)] leading-none whitespace-pre-line text-black/90 border-t pt-2">
@@ -124,7 +129,7 @@ import { testimonials } from "../data/testimonials.js";
                     data-testimonial-close
                     class="sr-only cursor-pointer focus-visible:not-sr-only focus-visible:absolute focus-visible:top-[1.248cqw] focus-visible:right-[1.248cqw] focus-visible:bg-yellow focus-visible:text-[clamp(12px,1.123cqw,18px)] focus-visible:leading-none focus-visible:text-black/90"
                 >
-                    close ×
+                    {ui?.close}
                 </button>
             </div>
         ))

@@ -1,0 +1,56 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Img from "../../components/Img.astro";
+import SectionBand from "../../components/SectionBand.astro";
+import { getPage } from "../../lib/queries.js";
+
+export async function getStaticPaths() {
+    const { localePaths } = await import("../../lib/i18n.js");
+    return localePaths();
+}
+
+const { locale } = Astro.props;
+const { settings, nav, ui, page, reports } = await getPage("reports", locale);
+---
+
+<Layout title={page?.title} locale={locale} settings={settings} nav={nav} ui={ui}>
+    <section class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px]">
+        <Img
+            image={page?.heroImage}
+            alt={page?.heroAlt}
+            width={1600}
+            loading="eager"
+            label="reports.png"
+        />
+    </section>
+
+    <SectionBand title={page?.bandLabel} bg="bg-teal" text="text-[#0d3b31]" />
+
+    <section
+        class="grid w-full grid-cols-1 gap-8 px-4 py-16 sm:grid-cols-2 md:grid-cols-3 md:gap-[4%] md:px-[4%] md:py-[10%]"
+    >
+        {
+            reports.map((r) => (
+                <a
+                    href={r.pdf}
+                    target="_blank"
+                    rel="noopener"
+                    class:list={[
+                        r.cardColor,
+                        "group relative flex aspect-[393/565] flex-col justify-between overflow-hidden p-[6%]",
+                    ]}
+                >
+                    {/* The cover carries the title, so the artwork is the card
+                        and the name it goes by is set for screen readers —
+                        without it the link is a picture with nothing to read. */}
+                    <span class="sr-only">
+                        {r.title}: {r.subtitle}, {r.author} {ui?.pdfSuffix}
+                    </span>
+                    <div class="absolute inset-0 opacity-100">
+                        <Img image={r.cover} alt="" width={800} label={r.title} />
+                    </div>
+                </a>
+            ))
+        }
+    </section>
+</Layout>

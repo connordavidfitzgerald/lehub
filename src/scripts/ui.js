@@ -9,10 +9,10 @@ import { stickers } from "./sticker.js";
  * sheet instead — pinning the texture to the content is *less* apparent
  * movement, not more.
  * ------------------------------------------------------------------ */
-function printSheet() {
-    const root = document.documentElement;
-    const set = (y) => root.style.setProperty("--print-y", Math.round(y));
+const setPrintY = (y) =>
+    document.documentElement.style.setProperty("--print-y", Math.round(y));
 
+function printSheet() {
     let queued = false;
     addEventListener(
         "scroll",
@@ -21,12 +21,12 @@ function printSheet() {
             queued = true;
             requestAnimationFrame(() => {
                 queued = false;
-                set(window.scrollY);
+                setPrintY(window.scrollY);
             });
         },
         { passive: true },
     );
-    set(window.scrollY);
+    setPrintY(window.scrollY);
 }
 
 /* ------------------------------------------------------------------ *
@@ -43,7 +43,9 @@ function mobileMenu() {
     toggle.addEventListener("click", () => {
         open = !open;
         toggle.setAttribute("aria-expanded", String(open));
-        if (label) label.textContent = open ? "close" : "menu";
+        // Both words come off the element: the site is built in two
+        // languages, so the script cannot know which pair it is toggling.
+        if (label) label.textContent = open ? label.dataset.close : label.dataset.open;
         document.body.style.overflow = open ? "hidden" : "";
         panel.hidden = !open;
     });
@@ -133,7 +135,7 @@ function pillars() {
  * The artboard draws no close control, so dismissal is Escape or a click off
  * the card — the hidden close button is there for keyboard and assistive tech.
  * ------------------------------------------------------------------ */
-function testimonials() {
+function testimonials(signal) {
     const triggers = [...document.querySelectorAll("[data-testimonial-open]")];
     if (!triggers.length) return;
 
@@ -180,7 +182,7 @@ function testimonials() {
         if (!trigger) return;
         closeAll();
         trigger.focus({ preventScroll: true });
-    });
+    }, { signal });
 
     // Click-off, bound wide so a click anywhere on the page dismisses the card,
     // not just one inside the section. Both the trigger's own handler and this
@@ -191,7 +193,7 @@ function testimonials() {
         const hit = event.target instanceof Element ? event.target : null;
         if (hit?.closest("[data-testimonial-panel][data-open], [data-testimonial-open]")) return;
         closeAll();
-    });
+    }, { signal });
 }
 
 /* ------------------------------------------------------------------ *
@@ -201,7 +203,7 @@ function testimonials() {
  * stays the labelled control for what it reveals, the CSS owns the stamp, and
  * dismissal is Escape, the close button, or a click off the card.
  * ------------------------------------------------------------------ */
-function landAcknowledgement() {
+function landAcknowledgement(signal) {
     const trigger = document.querySelector("[data-land-open]");
     const panel = document.querySelector("[data-land-panel]");
     if (!trigger || !panel) return;
@@ -230,7 +232,7 @@ function landAcknowledgement() {
 
     addEventListener("keydown", (event) => {
         if (event.key === "Escape") close({ refocus: true });
-    });
+    }, { signal });
 
     // Click-off. The trigger's own handler and this one both see every click,
     // so a click on the trigger or inside the open card is left alone and
@@ -240,7 +242,7 @@ function landAcknowledgement() {
         const hit = event.target instanceof Element ? event.target : null;
         if (hit?.closest("[data-land-panel][data-open], [data-land-open]")) return;
         close();
-    });
+    }, { signal });
 }
 
 /* ------------------------------------------------------------------ *
@@ -258,7 +260,7 @@ function landAcknowledgement() {
  * `aria-modal`, so focus is kept inside it while it is up and handed back to
  * the field that opened it on the way out.
  * ------------------------------------------------------------------ */
-function newsletter() {
+function newsletter(signal) {
     const panel = document.querySelector("[data-newsletter-panel]");
     const scrim = document.querySelector("[data-newsletter-scrim]");
     const forms = [...document.querySelectorAll("[data-newsletter-open]")];
@@ -334,7 +336,7 @@ function newsletter() {
             event.preventDefault();
             first.focus({ preventScroll: true });
         }
-    });
+    }, { signal });
 
     // The card posts to Mailchimp in a new tab, so this one keeps standing
     // here with the card up. Closing it is the honest end to the interaction.
@@ -343,13 +345,45 @@ function newsletter() {
     });
 }
 
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
+ * Boot.
+ *
+ * ClientRouter swaps the document instead of reloading it, so this module is
+ * only ever evaluated once: everything that binds to page content has to be
+ * bound again on each swap, from astro:page-load (which fires for the first
+ * page too). Listeners on the elements themselves go out with the old body,
+ * but the handful bound to the window would outlive it — those hang off a
+ * per-page signal that is cut on the way out, so nothing stacks up across a
+ * session's worth of navigations.
+ * ------------------------------------------------------------------ */
+let page;
+
+document.addEventListener("astro:page-load", () => {
+    page = new AbortController();
+    const { signal } = page;
+
+    // Scroll is back at the top on a fresh page, and the texture has to be
+    // told: the scroll listener below won't fire until you move.
+    setPrintY(window.scrollY);
+
+    stickers();
+    mobileMenu();
+    navGroups();
+    faq();
+    pillars();
+    testimonials(signal);
+    landAcknowledgement(signal);
+    newsletter(signal);
+});
+
+document.addEventListener("astro:before-swap", (event) => {
+    page?.abort();
+    // The swap copies <html>'s attributes off the incoming document, which is
+    // server markup and so has never run the head's `js` flag — without this,
+    // the flag is dropped mid-navigation and every disclosure lands open (the
+    // collapsed state is `.js .disclosure`, so the no-JS fallback takes over).
+    event.newDocument.documentElement.classList.add("js");
+});
+
+// Window-level and stateless, so it is bound once for the session.
 printSheet();
-stickers();
-mobileMenu();
-navGroups();
-faq();
-pillars();
-testimonials();
-landAcknowledgement();
-newsletter();

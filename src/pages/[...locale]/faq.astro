@@ -1,0 +1,74 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Img from "../../components/Img.astro";
+import RichText from "../../components/RichText.astro";
+import SectionBand from "../../components/SectionBand.astro";
+import { getPage } from "../../lib/queries.js";
+
+export async function getStaticPaths() {
+    const { localePaths } = await import("../../lib/i18n.js");
+    return localePaths();
+}
+
+const { locale } = Astro.props;
+const { settings, nav, ui, page, items } = await getPage("faq", locale);
+---
+
+<Layout title={page?.title} locale={locale} settings={settings} nav={nav} ui={ui}>
+    <section class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px]">
+        <Img
+            image={page?.heroImage}
+            alt={page?.heroAlt}
+            width={1600}
+            loading="eager"
+            label="aboutus.png"
+        />
+    </section>
+
+    <div class="w-full bg-purple">
+        <SectionBand title={page?.bandLabel} bg="bg-purple" />
+
+        <div class="flex flex-col">
+            {
+                items.map((item) => (
+                    <div
+                        data-faq-item
+                        data-draft={item.draft ? "true" : undefined}
+                        {/* The purple is the section's ground, not the item's —
+                            an open item lays paper over it so the answer reads
+                            on the same stock as the rest of the site. Keyed off
+                            the trigger's own aria-expanded via `has-`, so the
+                            open state stays in one place and the JS keeps
+                            managing exactly what it already did. */}
+                        class="border not-first:border-t has-[[data-faq-trigger][aria-expanded='true']]:bg-paper"
+                    >
+                        <button
+                            type="button"
+                            data-faq-trigger
+                            aria-expanded="false"
+                            class="group flex w-full cursor-pointer items-start justify-between gap-4 px-[1%] py-[0.4%] text-left hover:bg-black/10"
+                        >
+                            <h2 class="text-[clamp(36px,5.926cqw,95px)] leading-[0.9] text-black/90">
+                                {item.question}
+                            </h2>
+                            <span class="mt-2 shrink-0 font-sans text-[clamp(18px,2.246cqw,36px)] leading-none group-aria-expanded:rotate-45">
+                                +
+                            </span>
+                        </button>
+                        <div data-faq-answer>
+                            {/* Set as the offerings accordion sets its blurb —
+                                180/1603 is the bar, 38/1603 = 2.32cqw the copy
+                                under it — so the two accordions on the site
+                                answer in the same voice. */}
+                            <RichText
+                                value={item.answer}
+                                class="max-w-[72ch] px-[1%] pb-[1.2%] pt-1 font-sans text-[clamp(14px,2.32cqw,38px)] leading-none text-black/90"
+                                locale={locale}
+                            />
+                        </div>
+                    </div>
+                ))
+            }
+        </div>
+    </div>
+</Layout>

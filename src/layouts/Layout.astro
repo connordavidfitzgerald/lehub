@@ -6,30 +6,53 @@ import Footer from "../components/Footer.astro";
 import PrintOverlay from "../components/PrintOverlay.astro";
 import Newsletter from "../components/Newsletter.astro";
 import { Image } from "astro:assets";
+import { ClientRouter } from "astro:transitions";
+import { DEFAULT_LOCALE, OTHER_LOCALE, swapLocale } from "../lib/i18n.js";
 
 import sunset from "../assets/images/Sunset.png";
 
 interface Props {
+    locale: string;
+    settings: any;
+    nav: any[];
+    ui: any;
     title?: string;
     /** /contact IS the footer block, so it must not be repeated. */
     footer?: boolean;
 }
-const { title = "Le Hub — Training centre for organizers", footer = true } = Astro.props;
+const { locale, settings, nav, ui, title, footer = true } = Astro.props;
+
+const pageTitle = title || settings?.defaultTitle;
+// The alternate is a real URL rather than a path so the tag is valid wherever
+// the site is served from.
+const alternate = new URL(swapLocale(Astro.url.pathname, OTHER_LOCALE[locale]), Astro.url);
+const here = new URL(Astro.url.pathname, Astro.url);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={locale}>
     <head>
         <meta charset="utf-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="generator" content={Astro.generator} />
-        <meta
-            name="description"
-            content="Le Hub is a bilingual training centre for organizers and grassroots groups across so-called Canada and Québec."
+        <meta name="description" content={settings?.metaDescription} />
+        <title>{pageTitle}</title>
+        {/* Each page says where its other language is, and which one is the
+            default, so a search engine indexes the pair rather than reading one
+            as a duplicate of the other. */}
+        <link rel="alternate" hreflang={locale} href={here.href} />
+        <link rel="alternate" hreflang={OTHER_LOCALE[locale]} href={alternate.href} />
+        <link
+            rel="alternate"
+            hreflang="x-default"
+            href={new URL(swapLocale(Astro.url.pathname, DEFAULT_LOCALE), Astro.url).href}
         />
-        <title>{title}</title>
+        <!-- Swapping the document rather than reloading it is what lets the
+             sidebar sit out the navigation entirely: see the page-transition
+             block in styles/global.css. -->
+        <ClientRouter />
         <script is:inline>
             document.documentElement.classList.add("js");
         </script>
@@ -45,8 +68,8 @@ const { title = "Le Hub — Training centre for organizers", footer = true } = A
         >
             <Image src={sunset} class="object-cover w-full h-full" alt="" />
         </div>
-        <MobileBar />
-        <Sidebar />
+        <MobileBar nav={nav} settings={settings} ui={ui} locale={locale} />
+        <Sidebar nav={nav} settings={settings} ui={ui} locale={locale} />
         <!-- @container: the Figma ratios are measured against the 1603px content
              column, so sections size themselves in cqw of main, not vw — a
              section's height comes from the column it sits in, never from how
@@ -56,14 +79,17 @@ const { title = "Le Hub — Training centre for organizers", footer = true } = A
              to be able to outgrow it. -->
         <main class="@container flex w-full min-w-0 grow flex-col md:ml-[max(16.56vw,220px)] md:w-auto">
             <slot />
-            {footer && <Footer />}
+            {footer && <Footer settings={settings} ui={ui} locale={locale} />}
         </main>
         <PrintOverlay />
         {/* Root-level, not inside `main`: `main` is a `@container`, and a
             container is the containing block for its fixed descendants, so the
             card would centre on the document rather than the viewport. */}
-        <Newsletter />
+        <Newsletter settings={settings} ui={ui} />
         <script>
+            // Module scripts evaluate once per document, and ClientRouter only
+            // ever loads one — so the work of binding a page is done on
+            // astro:page-load from inside, not by this import running again.
             import "../scripts/ui.js";
         </script>
     </body>

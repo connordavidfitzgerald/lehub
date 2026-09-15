@@ -9,15 +9,20 @@
 // alike. `full` only changes whether it draws the rule above it: as the page,
 // the band over it already has one.
 import Img from "./Img.astro";
-import { social } from "../data/social.js";
-import { ACTION, TRAP } from "../data/newsletter.js";
+import RichText from "./RichText.astro";
 import Arrow from "./Arrow.astro";
+import { Image } from "astro:assets";
+
+import scfLogo from "../assets/images/scf_logo.png";
 
 interface Props {
+    settings: any;
+    ui: any;
+    locale: string;
     /** /contact renders it as the page itself — no sibling section above it. */
     full?: boolean;
 }
-const { full = false } = Astro.props;
+const { settings, ui, locale, full = false } = Astro.props;
 
 const eyebrow = "w-fit text-[clamp(14px,1.372cqw,22px)] leading-[1.1] ";
 // 72/1603 = 4.49cqw. The 34px floor is for the stacked layout, where this
@@ -84,7 +89,7 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
             `h-full` then has a definite box to fill. */
         }
         <div class="h-[420px] w-full shrink-0 md:h-auto md:w-1/2 md:border-r">
-            <Img name="footer.png" alt="" position="object-center" />
+            <Img image={settings?.footerImage} alt="" label="footer.png" />
         </div>
 
         <!-- content -->
@@ -102,21 +107,18 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
             <div class={`flex flex-col ${GROUP}`}>
                 <div class={`flex flex-col ${ITEM}`}>
                     <div class={`flex flex-col ${PAIR}`}>
-                        <p class={eyebrow}>
-                            For general inquiries, training requests, or questions about our
-                            programs, reach us at:
-                        </p>
-                        <a href="mailto:contact@lehub.ca" class={bigLink}>
+                        <p class={eyebrow}>{settings?.contactEyebrow}</p>
+                        <a href={`mailto:${settings?.contactEmail}`} class={bigLink}>
                             <span class="hl-mark" aria-hidden="true"></span>
-                            <span class="hl-label">contact@lehub.ca</span>
+                            <span class="hl-label">{settings?.contactEmail}</span>
                         </a>
                     </div>
 
                     <div class={`flex flex-col ${PAIR}`}>
-                        <span class={eyebrow}>Follow us on social media:</span>
+                        <span class={eyebrow}>{settings?.socialEyebrow}</span>
                         <div class="flex flex-col">
                             <a
-                                href={social.instagram}
+                                href={settings?.instagram}
                                 target="_blank"
                                 rel="noopener"
                                 class={bigLink}
@@ -125,7 +127,7 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
                                 <span class="hl-label">Instagram</span>
                             </a>
                             <a
-                                href={social.facebook}
+                                href={settings?.facebook}
                                 target="_blank"
                                 rel="noopener"
                                 class={bigLink}
@@ -143,24 +145,20 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
                         not a social account or the inbox. */
                     }
                     <div class={`flex flex-col ${PAIR}`}>
-                        <p class={eyebrow}>
-                            Tell us what you learned, what changed in your organizing, and where we
-                            can do better — with your name or anonymously. Your reflections keep us
-                            accountable and show funders what this work makes possible.
-                        </p>
+                        <p class={eyebrow}>{settings?.testimonialEyebrow}</p>
                         <a
-                            href="https://cryptpad.fr/form/#/3/form/view/65931ccc0fee9528dc5bce72b3bdf6f5/"
+                            href={settings?.testimonialUrl}
                             target="_blank"
                             rel="noopener"
                             class={bigLink}
                         >
                             <span class="hl-mark" aria-hidden="true"></span>
-                            <span class="hl-label">Share a testimonial</span>
+                            <span class="hl-label">{settings?.testimonialLinkLabel}</span>
                         </a>
                     </div>
                 </div>
                 <div class={`flex flex-col ${PAIR}`}>
-                    <label class={eyebrow} for="nl-footer">Sign up for our newsletter:</label>
+                    <label class={eyebrow} for="nl-footer">{settings?.newsletterFooterLabel}</label>
                     {
                         /* This one is the real thing, not a trigger: the field
                         is already the size of the card the overlay would
@@ -176,7 +174,7 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
                     }
                     <div class="flex flex-col gap-[0.12em]">
                         <form
-                            action={ACTION}
+                            action={settings?.newsletterAction}
                             method="post"
                             target="_blank"
                             class="flex w-full items-end justify-between gap-4"
@@ -187,7 +185,7 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
                                 name="EMAIL"
                                 required
                                 autocomplete="email"
-                                placeholder="EMAIL"
+                                placeholder={ui?.emailPlaceholder?.toUpperCase()}
                                 class={`${big} min-w-0 flex-1 border-0 -mt-2 bg-transparent p-0 outline-none placeholder:text-black/90 focus:placeholder:text-black/35`}
                             />
                             {
@@ -196,7 +194,12 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
                                 they know to skip. */
                             }
                             <div class="absolute left-[-5000px]" aria-hidden="true">
-                                <input type="text" name={TRAP} tabindex="-1" value="" />
+                                <input
+                                    type="text"
+                                    name={settings?.newsletterTrap}
+                                    tabindex="-1"
+                                    value=""
+                                />
                             </div>
                             {
                                 /* The square is the cap height of the word
@@ -212,7 +215,7 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
                             }
                             <button
                                 type="submit"
-                                aria-label="Subscribe"
+                                aria-label={ui?.subscribe}
                                 class="grid aspect-square shrink-0 mb-2 cursor-pointer place-items-center bg-pink text-black/90 leading-none w-[clamp(25.5px,3.3675cqw,54px)] text-[clamp(18px,2.357cqw,38px)] md:w-[clamp(15px,3.3675cqw,54px)] md:text-[clamp(10.5px,2.357cqw,38px)]"
                             >
                                 <Arrow />
@@ -232,26 +235,40 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
                 the newsletter rule above it, which is why it holds at md too. */
             }
             <div
-                class="mt-[max(2.494cqw,28px)] flex flex-col gap-2 pb-[max(2.494cqw,28px)] text-[clamp(12px,1.123cqw,18px)] leading-none md:flex-row md:items-end md:justify-between"
+                class="mt-[max(2.494cqw,28px)] flex flex-col gap-[max(1.247cqw,16px)] pb-[max(2.494cqw,28px)]"
             >
-                <p id="land-ack-line">
-                    Le Hub was founded on the territories of The Kanien’kehá:ka.
-                </p>
+                {
+                    /* The funder's mark, set small and above the line rather
+                    than beside it: it belongs with the acknowledgement group,
+                    not in the row of two items the row below balances. */
+                }
+                <Image
+                    src={scfLogo}
+                    alt="SCF"
+                    width={240}
+                    densities={[1, 2]}
+                    class="h-auto w-[clamp(84px,7.487cqw,120px)]"
+                />
+                <div
+                    class="flex flex-col gap-2 text-[clamp(12px,1.123cqw,18px)] leading-none md:flex-row md:items-end md:justify-between"
+                >
+                    <p id="land-ack-line">{settings?.landLine}</p>
                 {
                     /* A disclosure, not a link: the full acknowledgement is on the
                     page already and this uncovers it, the same way "Read full
                     testimonial" does. */
                 }
-                <button
-                    type="button"
-                    data-land-open
-                    aria-expanded="false"
-                    aria-controls="land-ack"
-                    class="hl-link shrink-0 cursor-pointer text-left"
-                >
-                    <span class="hl-mark" aria-hidden="true"></span>
-                    <span class="hl-label">Read more →</span>
-                </button>
+                    <button
+                        type="button"
+                        data-land-open
+                        aria-expanded="false"
+                        aria-controls="land-ack"
+                        class="hl-link shrink-0 cursor-pointer text-left"
+                    >
+                        <span class="hl-mark" aria-hidden="true"></span>
+                        <span class="hl-label">{settings?.landLinkLabel}</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -285,9 +302,9 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
         <div
             class={`flex shrink-0 items-baseline justify-between gap-4 border-b pb-[0.6em] ${eyebrow} w-full`}
         >
-            <span id="land-ack-title">Land acknowledgement</span>
+            <span id="land-ack-title">{settings?.landTitle}</span>
             <button type="button" data-land-close class="shrink-0 cursor-pointer hover:text-pink">
-                close ×
+                {ui?.close}
             </button>
         </div>
         {
@@ -296,25 +313,7 @@ const GROUP = "gap-[max(2.494cqw,28px)]";
         }
         <div class="min-h-0 flex-1 overflow-y-auto">
             <div class="flex flex-col gap-[0.9em] text-[clamp(13px,1.372cqw,22px)] leading-[1.2]">
-                <p>
-                    The Organizing Hub / Le Hub de Mobilisation was founded on the territories of
-                    The Kanien’kehá:ka, who are the keepers of the Eastern Door of the Haudenosaunee
-                    Confederacy. The island called “Montreal” is known as Tiotià:ke in Kanien’kehá,
-                    and has long been a meeting place for many Indigenous nations. Le Hub team is
-                    based across Turtle Island, including Tiotià:ke, unceded Algonquin territory in
-                    rural Ontario, and Tkaronto.
-                </p>
-                <p>
-                    Our understandings of organizing have been shaped by the leadership of multiple
-                    active Indigenous struggles, including: Aamjiwnaang First Nation’s and Grassy
-                    Narrows First Nation’s fights against environmental racism in Treaty 29 and
-                    Treaty 3 territory; Neskantaga First Nation’s ongoing fight against the
-                    so-called Ring of Fire; the massive #ShutDownCanada movement of 2020 led by
-                    Wet’suwet’en land defenders; the leadership of Nehirowisiw, Innu, Abenaki and
-                    Anishinaabe land defenders in the MAMO Alliance and the km 134 blockades against
-                    commercial logging in Quebec; and global Indigenous struggles against Canadian
-                    mining across Latin America, Africa, and the Global South.
-                </p>
+                <RichText value={settings?.landBody} locale={locale} />
             </div>
         </div>
     </div>

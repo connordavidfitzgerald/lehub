@@ -1,69 +1,94 @@
 ---
-// Running copy with links in it.
+// Running copy with links in it, as Portable Text.
 //
-// A sentence in the middle of a paragraph cannot be a data string and a link at
-// the same time, so copy that needs one is written as a list of segments: a
-// plain string, or an object naming what the words do. This renders that list
-// inline, leaving the paragraph and its type to the caller.
+// This used to take a hand-written list of segments; it takes blocks from the
+// content lake now, but it draws exactly what it drew before, because the marks
+// the schema allows are the same three things the design has ever needed:
 //
-//   "Subscribe to "                                    -> text
-//   { text: "our newsletter", newsletter: true }       -> opens the sign-up card
-//   { text: "Compass", href: "/offerings#compass" }    -> a link
-//   { text: "(EN)", small: true }                      -> an aside, half size
+//   a link annotation      -> a link, in the site's dress
+//   a newsletter annotation -> the button that opens the sign-up card
+//   the `small` decorator  -> an aside, set half size
 //
-// Every link wears the same dress, whatever it does, because to a reader they
+// Every link wears the same dress whatever it does, because to a reader they
 // are all the same offer: the site's marker plus a rule, so the link reads as
 // one at rest too — the marker alone is a hover state, and there is no hover on
 // a touch screen.
-interface Part {
-    text: string;
-    href?: string;
-    newsletter?: boolean;
-    small?: boolean;
-}
+import { localize } from "../lib/i18n.js";
 
 interface Props {
-    parts: (string | Part)[];
+    /** Portable Text blocks. */
+    value?: any[] | null;
+    /** Wraps each block. Pass the type the caller sets; defaults to a <p>. */
+    class?: string;
+    locale?: string;
+    /** Render a single block's spans with no wrapper, for copy already in a <p>. */
+    inline?: boolean;
 }
-const { parts } = Astro.props;
+
+const { value, class: cls = "", locale = "en", inline = false } = Astro.props;
+const blocks = (value ?? []).filter((b) => b?._type === "block");
 
 const dress = "hl-link underline decoration-1 underline-offset-2";
+
+/** The mark definitions a span's `marks` can point at, by key. */
+const defs = (block: any) =>
+    Object.fromEntries((block.markDefs ?? []).map((d: any) => [d._key, d]));
 ---
 
 {
-    parts.map((part) => {
-        if (typeof part === "string") return part;
+    blocks.map((block) => {
+        const md = defs(block);
+        const spans = (block.children ?? []).map((span: any) => {
+            const marks = span.marks ?? [];
+            const link = marks.map((m: string) => md[m]).find(Boolean);
+            const small = marks.includes("small");
+            const em = marks.includes("em");
+            const strong = marks.includes("strong");
 
-        if (part.small) return <span class="text-[0.5em]">{part.text}</span>;
+            // The plain cases first, so the common span costs nothing.
+            let text: any = span.text;
+            if (small) text = <span class="text-[0.5em]">{text}</span>;
+            if (strong) text = <strong>{text}</strong>;
+            // Review Condensed has no italic cut, so an `em` is a synthesised
+            // slant on desktop only — the same compromise the About page made
+            // when this was hard-coded.
+            if (em) text = <em class="not-italic md:italic">{text}</em>;
 
-        // The newsletter one opens the card rather than going anywhere, so it
-        // is a button — dressed the same, because to the reader it is the same
-        // offer.
-        if (part.newsletter)
-            return (
-                <button
-                    type="button"
-                    data-newsletter-open
-                    class={`${dress} cursor-pointer text-left`}
-                >
-                    <span class="hl-mark" aria-hidden="true" />
-                    <span class="hl-label">{part.text}</span>
-                </button>
-            );
+            if (link?._type === "newsletter") {
+                return (
+                    <button
+                        type="button"
+                        data-newsletter-open
+                        class={`${dress} cursor-pointer text-left`}
+                    >
+                        <span class="hl-mark" aria-hidden="true" />
+                        <span class="hl-label">{text}</span>
+                    </button>
+                );
+            }
 
-        // A mailto hands off to a mail client and an in-site link stays in the
-        // tab you are reading; only somewhere else on the web gets a new one.
-        const external = /^https?:/.test(part.href ?? "");
-        return (
-            <a
-                href={part.href}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noopener" : undefined}
-                class={dress}
-            >
-                <span class="hl-mark" aria-hidden="true" />
-                <span class="hl-label">{part.text}</span>
-            </a>
-        );
+            if (link?._type === "link") {
+                // A mailto hands off to a mail client and an in-site link stays
+                // in the tab you are reading; only somewhere else on the web
+                // gets a new one. In-site links are localized, so a French page
+                // never sends you back into the English tree.
+                const external = /^https?:/.test(link.href ?? "");
+                return (
+                    <a
+                        href={localize(link.href, locale)}
+                        target={external ? "_blank" : undefined}
+                        rel={external ? "noopener" : undefined}
+                        class={dress}
+                    >
+                        <span class="hl-mark" aria-hidden="true" />
+                        <span class="hl-label">{text}</span>
+                    </a>
+                );
+            }
+
+            return text;
+        });
+
+        return inline ? spans : <p class={cls}>{spans}</p>;
     })
 }

@@ -1,0 +1,222 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Img from "../../components/Img.astro";
+import RichText from "../../components/RichText.astro";
+import SectionBand from "../../components/SectionBand.astro";
+import TeamGrid from "../../components/TeamGrid.astro";
+import { getPage } from "../../lib/queries.js";
+
+export async function getStaticPaths() {
+    const { localePaths } = await import("../../lib/i18n.js");
+    return localePaths();
+}
+
+const { locale } = Astro.props;
+const { settings, nav, ui, page, team, advisors } = await getPage("about", locale);
+const statement = "font-sans leading-none text-black/90 text-[clamp(24px,3.743cqw,60px)]";
+const body = "text-[clamp(15px,1.622cqw,26px)] leading-[1.15]";
+const lede = "text-[clamp(18px,2.246cqw,36px)] leading-none font-sans";
+
+const cardLabel =
+    "font-sans  uppercase leading-none text-black/90 text-[clamp(14px,1.497cqw,24px)]";
+const cardBody = "font-sans  leading-[1.05] text-black/90 text-[clamp(18px,1.497cqw,28px)]";
+
+const listHead = "font-sans text-[clamp(14px,1.372cqw,22px)] leading-none";
+const listName = "font-sans text-[clamp(13px,1.248cqw,20px)] leading-none";
+
+// Mobile stacks the approach cards one under another, where the editor's
+// per-card colour reads as four unrelated slabs rather than a grid — so the
+// column runs lime throughout and the chosen colour only comes back at md,
+// where the cards sit side by side and the alternation is the point.
+//
+// Spelled out rather than built as `md:${c.background}`: Tailwind scans the
+// source for whole class names, and a name assembled at runtime is one it
+// never sees, so the interpolated form would emit no rule at all.
+const APPROACH_BG_MD = {
+    "bg-paper": "md:bg-paper",
+    "bg-band-green": "md:bg-band-green",
+    "bg-band-pink": "md:bg-band-pink",
+};
+---
+
+<Layout title={page?.title} locale={locale} settings={settings} nav={nav} ui={ui}>
+    <!-- hero + band -->
+    <section class="w-full">
+        <div
+            class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px] border-b border-b-black"
+        >
+            <Img
+                image={page?.heroImage}
+                alt={page?.heroAlt}
+                width={1600}
+                loading="eager"
+                label="hero-studio.jpg"
+            />
+        </div>
+        <SectionBand title={page?.bandLabel} bg="bg-lime" text="text-black/80" />
+    </section>
+
+    <!-- statement + banner photo -->
+    <section class="flex w-full flex-col md:min-h-[67.374cqw] md:flex-row">
+        <div
+            class="flex w-full flex-col justify-center gap-10 bg-paper p-4 md:w-1/2 md:gap-0 md:border-r md:p-[2.43cqw]"
+        >
+            <!-- Set in the display face like the hero, with the phrase the
+                 sentence turns on carried by the pink marker rather than by an
+                 italic — Review Condensed has no italic cut, so `em` was being
+                 synthesised into a slant the family never had. -->
+            <div class={`flex flex-col gap-[1em] ${lede}`}>
+                <RichText value={page?.statement} locale={locale} />
+            </div>
+        </div>
+        <div class="aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2">
+            <Img
+                image={page?.statementImage}
+                alt={page?.statementImageAlt}
+                label="about-1.png"
+            />
+        </div>
+    </section>
+
+    <!-- photo + two columns -->
+    <section class="flex w-full flex-col border-t md:min-h-[67.374cqw] md:flex-row">
+        <div class="aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2 md:border-r">
+            <Img
+                image={page?.focusImage}
+                alt={page?.focusImageAlt}
+                class="saturate-140"
+                label="about-3.jpg"
+            />
+        </div>
+        <div
+            class="flex w-full flex-col justify-center gap-[0.9em] bg-paper p-4 md:w-1/2 md:p-[2.43cqw]"
+        >
+            <RichText value={page?.focus} class={lede} locale={locale} />
+        </div>
+    </section>
+
+    <!-- wide statement + landscape -->
+    <section class="flex w-full flex-col h-fit border-t">
+        <div class="h-fit w-full md:h-auto md:flex-1">
+            <Img image={page?.momentImage} alt="" width={1600} label="about-2.jpg" />
+        </div>
+        <div class="flex flex-col gap-[0.9em] bg-paper p-4 md:p-[2.43cqw]">
+            <RichText value={page?.moment} class={lede} locale={locale} />
+        </div>
+    </section>
+
+    <!-- team -->
+    <section class="w-full border-t">
+        <SectionBand title={page?.teamBandLabel} bg="bg-band-green" text="text-black/80" />
+        <TeamGrid people={team} />
+    </section>
+
+    <!-- advisory board -->
+    <section class="w-full border-t">
+        <SectionBand title={page?.advisoryBandLabel} bg="bg-band-pink" text="text-black/80" />
+        <TeamGrid people={advisors} />
+    </section>
+
+    <!-- building from our roots -->
+    <section class="w-full border-t">
+        <SectionBand title={page?.rootsBandLabel} bg="bg-lime" text="text-black/80" />
+        <div class="flex w-full flex-col md:min-h-[67.374cqw] md:flex-row">
+            <div class="aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2 md:border-r">
+                <Img image={page?.rootsImage} alt={page?.rootsImageAlt} label="former.png" />
+            </div>
+            <!-- The copy hugs its own height at the top and the list hugs its
+                 own at the bottom, with the slack between them. It stays in
+                 flow so the gap under the paragraph is real spacing, but
+                 `mt-auto` drops it to the foot of the panel and negative
+                 margins pull it back out through the panel's padding on the
+                 left and the bottom, so it meets the photo and the bottom edge
+                 with no seam. -->
+            <div
+                {/* No `h-full` here: `height: 100%` against a row whose own
+                    height is auto is indefinite, so it resolved to the content
+                    height — and because `height` was set at all, the item
+                    stopped stretching. The panel came up short of the photo
+                    beside it and `mt-auto` parked the list at the panel's
+                    bottom rather than the section's. Left to `auto`, the flex
+                    default stretches it to the row. */}
+                {/* Mobile lays the panel out on an 8-column grid so the alumni
+                    block can sit in the middle six and read as an inset card
+                    rather than another full-bleed slab. At md the panel goes
+                    back to the flex column `mt-auto` needs to drop the block to
+                    the foot of the section.
+
+                    The mobile bottom padding restates the gap above the alumni
+                    block — the grid's row gap plus its own `mt-11` — so the block
+                    sits the same distance off the paragraph above it as off the
+                    section below. */}
+                class="grid w-full grid-cols-8 gap-[1.25cqw] bg-paper p-4 pb-[calc(2.75rem+1.25cqw)] md:flex md:w-1/2 md:flex-col md:p-[1.25cqw]"
+            >
+                <div class={`${body} col-span-8 shrink-0 font-sans flex flex-col gap-[1em]`}>
+                    <RichText value={page?.rootsBody} locale={locale} />
+                </div>
+                <div
+                    class="col-span-6 col-start-2 mt-11 flex min-h-0 flex-col bg-lime p-4 md:-mb-[1.25cqw] md:-ml-[1.25cqw] md:mt-auto md:w-[66%] md:p-[1.25cqw]"
+                >
+                    <div class={`${listHead} shrink-0 border-b border-black pb-[0.35em]`}>
+                        {page?.alumniTitle}
+                    </div>
+                    {
+                        /* One fixed row height rather than an equal share of the
+                        block: the block is sized by the list now, not the other
+                        way round, so the rhythm is the same on every screen and
+                        there is no slack left over to distribute. */
+                    }
+                    <ul class={listName}>
+                        {
+                            (page?.alumni ?? []).map((n) => (
+                                <li class="flex h-[1.35em] items-center border-b border-black">
+                                    {n}
+                                </li>
+                            ))
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- our approach -->
+    <section class="w-full border-t">
+        <SectionBand title={page?.approachBandLabel} bg="bg-lime" text="text-black/80" />
+        <!-- No borders on the blocks: the whole box is a black ground and the
+             blocks sit on it with a 1px gutter, so the outer rules and every
+             interior seam are the same single stroke as the rest of the site
+             and none can double, half-pixel, or go missing as the grid tracks
+             resolve. Its top edge is the one it does not draw — the band above
+             it already carries that rule, and `p-px` on all four sides would
+             lay a second one on top of it. The left edge is the same story: the
+             sidebar's own `border-r` is already the rule at that seam, so a
+             pixel of ground there stacks against it and the block reads 2px
+             there against 1px everywhere else. Hence right and bottom only. -->
+
+        <div class="flex w-full flex-col gap-px bg-black pr-px pb-px">
+            <!-- Not the display face here — the frame sets this in the sans at
+                 the same weight as the cards, and turns the closing phrase with
+                 an italic rather than a colour marker. -->
+            <div class="bg-lime p-4 md:bg-paper md:p-[1.25cqw]">
+                <RichText value={page?.approachStatement} class={statement} locale={locale} />
+            </div>
+            <div class="grid w-full grid-cols-1 gap-px md:grid-cols-2">
+                {
+                    (page?.approachCards ?? []).map((c) => (
+                        <div
+                            class:list={[
+                                "bg-lime",
+                                APPROACH_BG_MD[c.background] ?? "md:bg-paper",
+                                "flex flex-col justify-between gap-8 p-4 md:aspect-[802/540] md:p-[1.25cqw]",
+                            ]}
+                        >
+                            <h3 class={cardLabel}>{c.title}</h3>
+                            <p class={cardBody}>{c.body}</p>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+</Layout>

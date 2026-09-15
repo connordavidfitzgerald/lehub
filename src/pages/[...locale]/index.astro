@@ -1,0 +1,153 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Img from "../../components/Img.astro";
+import RichText from "../../components/RichText.astro";
+import PillarBars from "../../components/PillarBars.astro";
+import SectionBand from "../../components/SectionBand.astro";
+import Testimonials from "../../components/Testimonials.astro";
+import { getPage } from "../../lib/queries.js";
+import { localePaths, localize } from "../../lib/i18n.js";
+import { heroSize } from "../../lib/fit.js";
+
+export async function getStaticPaths() {
+    const { localePaths } = await import("../../lib/i18n.js");
+    return localePaths();
+}
+
+const { locale } = Astro.props;
+const { settings, nav, ui, page, programs, testimonials } = await getPage("home", locale);
+
+// The blue plate behind WIKI / REPORTS. 160/1603 = 9.98cqw, set solid with the
+// 9px optical drop under the baseline that the band carries in Figma. It is a
+// fixed size rather than a fitted one — the plate is a sticker centred on the
+// tile, not a band spanning it.
+const plate =
+    "font-display font-extrabold uppercase leading-[0.8] pb-[0.056em] bg-blue text-black/70 text-[clamp(48px,9.98cqw,160px)]";
+
+// Two lines, written one per line in the CMS.
+const heroLines = (page?.heroLines ?? "").split("\n").filter(Boolean);
+---
+
+<Layout title={page?.title} locale={locale} settings={settings} nav={nav} ui={ui}>
+    <!-- 1 · HERO -------------------------------------------------------- -->
+    <section
+        class="relative flex h-[100svh] w-full items-center justify-center md:h-screen md:min-h-[560px]"
+    >
+        <Img
+            image={page?.heroImage}
+            alt={page?.heroAlt}
+            width={1600}
+            loading="eager"
+            class="absolute inset-0"
+            label="hero-home.jpg"
+        />
+        <!-- The comma hangs below the band, and is meant to. With leading at
+             0.71em the baseline sits 0.04em below the content box and Review
+             Condensed's comma drops another 0.135em under that, so at the
+             Figma 0.05em padding it clears the pink by 0.125em. Covering it
+             costs more than it is worth either way: growing the padding makes
+             this band taller than "build movements.", and hanging the block
+             lower leaves a lip at each end where this line runs wider. The
+             band follows the baseline, the comma hangs off it. -->
+
+        <!-- The size is measured off the font rather than fixed: at 160px on
+             the 1603 artboard "LEARN TO ORGANIZE," is 8.04em wide, which is
+             0.8026 of a full-width fit, and that fraction is what holds the
+             composition. Keeping the fraction rather than the number is what
+             lets the longer French line set itself smaller and still sit in the
+             column the same way. Inline, because Tailwind only generates
+             arbitrary values it can find written out in the source. -->
+        <h1
+            class="relative z-10 flex w-full flex-col items-center leading-[0.71] text-nowrap text-black/80"
+            style={`font-size:${heroSize(heroLines)}`}
+        >
+            {
+                heroLines.map((line, i) => (
+                    <span
+                        class="block w-fit px-[0.031em] pt-[0.019em] pb-[0.05em]"
+                        data-sticker
+                        data-sticker-band
+                        style={i === 0 ? undefined : "--sticker-stagger:1;--sticker-offset:12"}
+                    >
+                        {line}
+                    </span>
+                ))
+            }
+        </h1>
+    </section>
+
+    <!-- 2 · ABOUT ------------------------------------------------------- -->
+    <section class="w-full border-t bg-paper">
+        <SectionBand title={page?.aboutBandLabel} bg="bg-lime" text="text-lime-ink" />
+        <div class="flex w-full flex-col md:min-h-[67.374cqw] md:flex-row">
+            <div class="aspect-[3/4] w-full md:aspect-auto md:h-auto md:w-1/2 md:border-r">
+                <Img image={page?.aboutImage} alt={page?.aboutImageAlt} label="lehub-home.png" />
+            </div>
+
+            <div class="relative flex w-full flex-col justify-center p-6 md:w-1/2 md:p-[2.43cqw]">
+                <div
+                    class="flex flex-col gap-[1em] text-[clamp(18px,2.246cqw,36px)] leading-none"
+                >
+                    <RichText value={page?.aboutBody} locale={locale} />
+                </div>
+                <a
+                    href={localize("/about", locale)}
+                    class="mt-10 w-fit text-[clamp(14px,1.497cqw,24px)] leading-none hover:text-pink md:absolute md:bottom-[2.43cqw] md:left-[2.43cqw] md:mt-0"
+                    >{ui?.learnMore}</a
+                >
+            </div>
+        </div>
+    </section>
+
+    <!-- 3 · OFFERINGS --------------------------------------------------- -->
+    <section class="w-full border-t bg-paper">
+        <SectionBand title={page?.offeringsBandLabel} bg="bg-gold" text="text-black/80" />
+        <PillarBars programs={programs} ui={ui} locale={locale} />
+    </section>
+
+    <!-- 4 · TESTIMONIALS ------------------------------------------------ -->
+    <Testimonials testimonials={testimonials} ui={ui} locale={locale} />
+
+    <!-- 5 · RESOURCES --------------------------------------------------- -->
+    <!-- Band and tiles are one section, like ABOUT and OFFERINGS above: left on
+         its own the band would draw a rule under itself and the tiles would
+         draw one over themselves, in the same place. -->
+    <section class="w-full border-t bg-paper">
+        <SectionBand title={page?.resourcesBandLabel} bg="bg-blue" text="text-black/80" />
+        <div class="flex w-full flex-col md:aspect-[1603/1080] md:flex-row">
+            <a
+                href={settings?.wikiUrl}
+                target="_blank"
+                rel="noopener"
+                class="group relative flex w-full items-center justify-center py-16 md:w-1/2 md:border-r md:py-0"
+                data-resource
+            >
+                <Img
+                    image={page?.wikiImage}
+                    alt=""
+                    cover={false}
+                    class="w-[85.9%] object-contain"
+                    label="wiki.png"
+                    data-resource-art
+                />
+                <span class={`absolute ${plate}`}>{page?.wikiLabel}</span>
+            </a>
+            <a
+                href={localize("/reports", locale)}
+                class="group relative flex w-full items-center justify-center overflow-hidden py-16 md:w-1/2 md:py-0"
+                data-resource
+                style="--tilt:1.6deg"
+            >
+                <Img
+                    image={page?.reportsImage}
+                    alt=""
+                    cover={false}
+                    class="w-[90%] max-w-none object-contain md:-mt-[2.3%]"
+                    label="reports.png"
+                    data-resource-art
+                />
+                <span class={`absolute ${plate}`}>{page?.reportsLabel}</span>
+            </a>
+        </div>
+    </section>
+</Layout>

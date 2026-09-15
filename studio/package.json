@@ -1,0 +1,21 @@
+{
+  "name": "lehub-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "start": "sanity start",
+    "build": "sanity build",
+    "deploy": "sanity deploy"
+  },
+  "dependencies": {
+    "@sanity/icons": "^3.7.0",
+    "@sanity/vision": "^4.10.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sanity": "^4.10.1",
+    "sanity-plugin-internationalized-array": "^3.1.0",
+    "styled-components": "^6.1.15"
+  }
+}

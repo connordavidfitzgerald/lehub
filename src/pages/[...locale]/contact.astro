@@ -1,0 +1,36 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Img from "../../components/Img.astro";
+import SectionBand from "../../components/SectionBand.astro";
+import { getPage } from "../../lib/queries.js";
+
+export async function getStaticPaths() {
+    const { localePaths } = await import("../../lib/i18n.js");
+    return localePaths();
+}
+
+const { locale } = Astro.props;
+const { settings, nav, ui, page } = await getPage("contact", locale);
+---
+
+<Layout title={page?.title} locale={locale} settings={settings} nav={nav} ui={ui}>
+    {/* The same hero the other inner pages open on. `eager`: it is the first
+        thing on the page, so there is nothing above it to defer behind. */}
+    <section class="h-[52svh] min-h-[320px] w-full md:h-[78vh] md:min-h-[420px]">
+        <Img
+            image={page?.heroImage}
+            alt={page?.heroAlt}
+            width={1600}
+            loading="eager"
+            label="contact.png"
+        />
+    </section>
+
+    {/* Pink is the one band colour the other pages leave unused: lime is
+        About, gold Offerings, blue Resources, purple FAQ, teal Reports.
+
+        The contact block is the footer now, rather than the page's own body, so
+        the layout appends it like everywhere else — and the band cedes the rule
+        under it to the footer's own `border-t` so the seam is struck once. */}
+    <SectionBand title={page?.bandLabel} bg="bg-pink" text="text-black/80" rule={false} />
+</Layout>

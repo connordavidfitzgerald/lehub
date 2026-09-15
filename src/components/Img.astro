@@ -1,48 +1,69 @@
 ---
-// Renders an image from src/assets/images by filename.
-// Until the Figma export lands, missing files render as a labelled placeholder
-// instead of breaking the build.
-import { Image } from "astro:assets";
-
-const modules = import.meta.glob<{ default: ImageMetadata }>(
-    "../assets/images/*.{jpg,jpeg,png,webp,avif}",
-    { eager: true },
-);
+// An image from Sanity, filling its box the way every framed picture on the
+// site does.
+//
+// The old version read files out of src/assets/images by name; the photographs
+// live in the content lake now, so what comes in is an image field and what
+// goes out is a CDN URL with the transform baked into it. A missing image still
+// renders as the labelled placeholder rather than breaking the build, because a
+// half-filled page is easier to fix than a failed deploy.
+//
+// `width` is the widest the picture is ever drawn at, in CSS pixels. Most of
+// the site's frames are half of a 1603px column, so 820 is the default; a
+// full-bleed hero passes 1600. The 2x entry in the srcset covers dense screens.
+import { urlFor, srcSet } from "../lib/sanity.js";
 
 interface Props {
-    name: string;
+    /** A Sanity image field. */
+    image?: { asset?: { _ref?: string }; hotspot?: unknown } | null;
     alt?: string;
+    width?: number;
     class?: string;
     position?: string;
     loading?: "eager" | "lazy";
+    /** Names the missing picture in the placeholder. */
+    label?: string;
+    /** The framed default. Turn it off where the picture is art placed inside
+     *  its tile rather than a photograph filling it — the two resource tiles
+     *  set their own width and `object-contain`, and the base classes would
+     *  race them for the same properties. */
+    cover?: boolean;
+    /** Anything else — `data-resource-art` and the like — lands on the <img>. */
+    [key: string]: any;
 }
 
 const {
-    name,
+    image,
     alt = "",
+    width = 820,
     class: cls = "",
     position = "object-center",
     loading = "lazy",
+    label = "image",
+    cover = true,
+    ...rest
 } = Astro.props;
 
-const key = Object.keys(modules).find((k) => k.endsWith(`/${name}`));
-const src = key ? modules[key].default : null;
+const src = urlFor(image, width);
 ---
 
 {
     src ? (
-        <Image
+        <img
             src={src}
+            srcset={srcSet(image, width)}
             alt={alt}
             loading={loading}
-            class={`h-full w-full object-cover ${position} ${cls}`}
+            decoding={loading === "eager" ? "sync" : "async"}
+            class:list={[cover && `h-full w-full object-cover ${position}`, cls]}
+            {...rest}
         />
     ) : (
         <div
             class={`h-full w-full bg-[repeating-linear-gradient(45deg,#e6e3d8_0px,#e6e3d8_12px,#dedbcf_12px,#dedbcf_24px)] flex items-center justify-center ${cls}`}
         >
-            <span class="font-sans text-[11px] tracking-wide text-black/45 px-2 text-center break-all">
-                {name}
+            <span class="font-sans text-[11px] text-black/45 px-2 text-center break-all">
+                {label}
             </span>
         </div>
     )
